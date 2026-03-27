@@ -1,10 +1,14 @@
 ---
 import { SITE } from '../site'
+
+// 根据当前页面深度计算返回首页的路径
+const depth = Astro.url.pathname.split('/').filter(Boolean).length - 1
+const homePath = depth > 0 ? '../'.repeat(depth) : './'
 ---
 
 <header class="header">
   <div class="header-container">
-    <a href="/" class="logo">
+    <a href={homePath} class="logo">
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="32" height="32" rx="6" fill="var(--color-primary)"/>
         <path d="M10 16L14 20L22 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -13,7 +17,7 @@ import { SITE } from '../site'
     </a>
 
     <nav class="nav">
-      <a href="/">首页</a>
+      <a href={homePath}>首页</a>
       <button class="theme-toggle" aria-label="切换主题">
         <svg class="sun-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
           <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="2"/>
