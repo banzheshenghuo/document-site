@@ -6,8 +6,8 @@ import { remarkMermaid } from './src/utils/mermaid'
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://yourusername.github.io/ai-document',
-  base: '/ai-document',
+  site: 'https://banzheshenghuo.github.io',
+  base: '/document-site',
   integrations: [
     expressiveCode({
       themes: ['dark-plus', 'light-plus'],
