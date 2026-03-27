@@ -2,9 +2,10 @@ import { defineConfig } from 'astro/config'
 import mdx from '@astrojs/mdx'
 import expressiveCode from 'astro-expressive-code'
 import remarkDirective from 'remark-directive'
-import { remarkMermaid } from './src/utils/mermaid'
+import { rehypeMermaid } from './src/utils/rehype-mermaid'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeSlug from 'rehype-slug'
+import { ExpressiveCodeBlock } from 'expressive-code'
 
 // https://astro.build/config
 export default defineConfig({
@@ -20,16 +21,21 @@ export default defineConfig({
           editorBackground: 'var(--color-code-bg)'
         }
       },
-      // 启用代码块功能
+      // 跳过 mermaid 代码块
+      customCreateBlock: ({ input }) => {
+        // 如果是 mermaid 代码块，返回 null 让后续插件处理
+        if (input.lang === 'mermaid') {
+          return null
+        }
+        return new ExpressiveCodeBlock(input)
+      },
       features: {
-        // 复制按钮
         copyButton: {
           visible: true,
           feedbackDuration: 3000,
           symbol: '⧉'
         }
       },
-      // 自定义样式
       customStyleOverrides: {
         'code-block': {
           'font-family': "'JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', monospace"
@@ -43,7 +49,7 @@ export default defineConfig({
   ],
   output: 'static',
   markdown: {
-    remarkPlugins: [remarkMermaid, remarkDirective],
+    remarkPlugins: [remarkDirective],
     rehypePlugins: [
       rehypeSlug,
       [rehypeAutolinkHeadings, {
@@ -51,7 +57,8 @@ export default defineConfig({
         properties: {
           className: ['heading-link']
         }
-      }]
+      }],
+      rehypeMermaid
     ]
   }
 })
