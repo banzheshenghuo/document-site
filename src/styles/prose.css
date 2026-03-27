@@ -100,3 +100,113 @@
   border-radius: 0.25rem;
   font-size: 0.9em;
 }
+
+/* 标题锚点样式 */
+.doc-content :global(h1 .heading-link),
+.doc-content :global(h2 .heading-link),
+.doc-content :global(h3 .heading-link),
+.doc-content :global(h4 .heading-link),
+.doc-content :global(h5 .heading-link),
+.doc-content :global(h6 .heading-link) {
+  position: relative;
+}
+
+.doc-content :global(h1 .heading-link)::before,
+.doc-content :global(h2 .heading-link)::before,
+.doc-content :global(h3 .heading-link)::before,
+.doc-content :global(h4 .heading-link)::before,
+.doc-content :global(h5 .heading-link)::before,
+.doc-content :global(h6 .heading-link)::before {
+  content: '#';
+  position: absolute;
+  left: -1.5rem;
+  color: var(--color-text-secondary);
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-weight: 300;
+}
+
+.doc-content :global(h1:hover .heading-link)::before,
+.doc-content :global(h2:hover .heading-link)::before,
+.doc-content :global(h3:hover .heading-link)::before,
+.doc-content :global(h4:hover .heading-link)::before,
+.doc-content :global(h5:hover .heading-link)::before,
+.doc-content :global(h6:hover .heading-link)::before {
+  opacity: 1;
+}
+
+/* Mermaid 图表样式 */
+.doc-content :global(.mermaid) {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 0.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.doc-content :global(.mermaid svg) {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 信息框样式 */
+.doc-content :global(.info-box),
+.doc-content :global(.warning-box),
+.doc-content :global(.success-box),
+.doc-content :global(.error-box) {
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  border-left: 4px solid;
+}
+
+.doc-content :global(.info-box) {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+.doc-content :global(.warning-box) {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: #f59e0b;
+}
+
+.doc-content :global(.success-box) {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: #22c55e;
+}
+
+.doc-content :global(.error-box) {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+/* 代码块语言标签 */
+.doc-content :global([data-language])::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .doc-content :global(h1 .heading-link)::before,
+  .doc-content :global(h2 .heading-link)::before,
+  .doc-content :global(h3 .heading-link)::before,
+  .doc-content :global(h4 .heading-link)::before,
+  .doc-content :global(h5 .heading-link)::before,
+  .doc-content :global(h6 .heading-link)::before {
+    left: -1rem;
+  }
+
+  .doc-content :global(.mermaid) {
+    padding: 1rem;
+    font-size: 0.875rem;
+  }
+}
