@@ -1,0 +1,102 @@
+/* 全局样式补充 */
+
+ prose {
+  --tw-prose-body: var(--color-text);
+  --tw-prose-headings: var(--color-text);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-text);
+  --tw-prose-code: var(--color-primary);
+  --tw-prose-pre-code: var(--color-text);
+  --tw-prose-pre-bg: var(--color-code-bg);
+  --tw-prose-quotes: var(--color-text-secondary);
+}
+
+/* 文章内容样式 */
+.doc-content {
+  max-width: 720px;
+}
+
+.doc-content :global(h1) {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.doc-content :global(h2) {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.75rem 0 0.75rem;
+}
+
+.doc-content :global(h3) {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.doc-content :global(p) {
+  margin: 1rem 0;
+  line-height: 1.75;
+}
+
+.doc-content :global(ul),
+.doc-content :global(ol) {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.doc-content :global(li) {
+  margin: 0.5rem 0;
+}
+
+.doc-content :global(blockquote) {
+  margin: 1.5rem 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid var(--color-primary);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}
+
+.doc-content :global(a) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.doc-content :global(img) {
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.doc-content :global(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.doc-content :global(th),
+.doc-content :global(td) {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.doc-content :global(th) {
+  background: var(--color-bg-secondary);
+  font-weight: 600;
+}
+
+/* 代码块样式增强 */
+.doc-content :global(pre) {
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.doc-content :global(code:not(pre code)) {
+  background: var(--color-bg-secondary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}

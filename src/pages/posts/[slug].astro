@@ -1,0 +1,137 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content'
+import DocLayout from '../../layouts/DocLayout.astro'
+import TableOfContents from '../../components/TableOfContents.astro'
+
+export async function getStaticPaths() {
+  const docs = await getCollection('posts')
+  return docs.map(doc => ({
+    params: { slug: doc.slug },
+    props: { doc },
+  }))
+}
+
+type Props = {
+  doc: CollectionEntry<'posts'>
+}
+
+const { doc } = Astro.props
+const { Content, headings } = await doc.render()
+---
+
+<DocLayout title={doc.data.title} description={doc.data.description}>
+  <article class="doc-layout doc-page">
+    <div class="doc-main">
+      <header class="doc-header">
+        <h1>{doc.data.title}</h1>
+        {doc.data.description && (
+          <p class="doc-description">{doc.data.description}</p>
+        )}
+        <div class="doc-meta">
+          {doc.data.date && (
+            <time class="doc-date">
+              {new Date(doc.data.date).toLocaleDateString('zh-CN')}
+            </time>
+          )}
+          {doc.data.tags && doc.data.tags.length > 0 && (
+            <div class="doc-tags">
+              {doc.data.tags.map(tag => (
+                <span class="doc-tag">{tag}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <div class="doc-content prose">
+        <Content />
+      </div>
+
+      <footer class="doc-footer">
+        <a href="/" class="back-link">← 返回首页</a>
+      </footer>
+    </div>
+
+    <TableOfContents headings={headings} />
+  </article>
+</DocLayout>
+
+<style>
+  .doc-page {
+    margin-top: 2rem;
+  }
+
+  .doc-main {
+    min-width: 0;
+  }
+
+  .doc-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .doc-header h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .doc-description {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .doc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .doc-date {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .doc-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .doc-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    background: var(--color-bg-secondary);
+    border-radius: 9999px;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+  }
+
+  .doc-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .back-link:hover {
+    color: var(--color-primary);
+  }
+
+  @media (max-width: 768px) {
+    .doc-header h1 {
+      font-size: 1.75rem;
+    }
+  }
+</style>

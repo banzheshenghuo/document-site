@@ -1,0 +1,141 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SearchBox from '../components/SearchBox.astro'
+import DocCard from '../components/DocCard.astro'
+import { getCollection } from 'astro:content'
+
+// 获取所有文档
+const allDocs = await getCollection('posts')
+
+// 按日期排序
+const sortedDocs = allDocs.sort((a, b) => {
+  const dateA = a.data.date ? new Date(a.data.date).getTime() : 0
+  const dateB = b.data.date ? new Date(b.data.date).getTime() : 0
+  return dateB - dateA
+})
+
+// 构建搜索索引
+const searchIndex = sortedDocs.map(doc => ({
+  slug: doc.slug,
+  title: doc.data.title,
+  description: doc.data.description || '',
+  content: doc.body?.slice(0, 500) || '',
+  tags: doc.data.tags || [],
+  date: doc.data.date || ''
+}))
+---
+
+<BaseLayout>
+  <div class="home">
+    <section class="hero">
+      <h1>AI 文档库</h1>
+      <p class="subtitle">探索、学习、分享技术知识</p>
+    </section>
+
+    <SearchBox />
+
+    <section class="docs-section">
+      <h2 class="section-title">
+        全部文档
+        <span class="doc-count">({sortedDocs.length})</span>
+      </h2>
+
+      <div class="docs-grid">
+        {sortedDocs.map(doc => (
+          <DocCard
+            slug={doc.slug}
+            title={doc.data.title}
+            description={doc.data.description}
+            date={doc.data.date}
+            tags={doc.data.tags}
+          />
+        ))}
+      </div>
+
+      {sortedDocs.length === 0 && (
+        <div class="empty-state">
+          <p>暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。</p>
+        </div>
+      )}
+    </section>
+  </div>
+
+  <script define:vars={{ searchIndex }}>
+    window.__SEARCH_INDEX__ = searchIndex
+  </script>
+</BaseLayout>
+
+<style>
+  .home {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 3rem 0 2rem;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+  }
+
+  .docs-section {
+    margin-top: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .doc-count {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    font-weight: 400;
+  }
+
+  .docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--color-text-secondary);
+  }
+
+  .empty-state code {
+    background: var(--color-code-bg);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+  }
+
+  @media (max-width: 640px) {
+    .hero h1 {
+      font-size: 2rem;
+    }
+
+    .docs-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

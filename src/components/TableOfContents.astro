@@ -1,0 +1,73 @@
+---
+interface Props {
+  headings: { depth: number; text: string; slug: string }[]
+}
+
+const { headings } = Astro.props
+
+// 过滤出 h2 和 h3
+const tocHeadings = headings.filter(h => h.depth <= 3)
+---
+
+{tocHeadings.length > 0 && (
+  <aside class="toc">
+    <div class="toc-header">目录</div>
+    <nav class="toc-nav">
+      <ul>
+        {tocHeadings.map(heading => (
+          <li style={`--depth: ${heading.depth - 1}`}>
+            <a href={`#${heading.slug}`}>{heading.text}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </aside>
+)}
+
+<style>
+  .toc {
+    position: sticky;
+    top: 5rem;
+    border-left: 1px solid var(--color-border);
+    padding-left: 1rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+  }
+
+  .toc-header {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .toc-nav ul {
+    list-style: none;
+  }
+
+  .toc-nav li {
+    --depth: 0;
+    padding-left: calc(var(--depth) * 1rem);
+  }
+
+  .toc-nav a {
+    display: block;
+    padding: 0.25rem 0;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-left: 2px solid transparent;
+    padding-left: 0.75rem;
+    transition: all 0.2s;
+  }
+
+  .toc-nav a:hover {
+    color: var(--color-primary);
+    border-left-color: var(--color-primary);
+  }
+
+  .toc-nav a.active {
+    color: var(--color-primary);
+    border-left-color: var(--color-primary);
+    font-weight: 500;
+  }
+</style>

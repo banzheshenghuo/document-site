@@ -1,0 +1,217 @@
+<div id="search-container" class="search-container">
+  <div class="search-box">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <circle cx="8.5" cy="8.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+      <path d="M14 14L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <input
+      type="text"
+      id="search-input"
+      placeholder="搜索文档..."
+      autocomplete="off"
+    />
+    <kbd class="search-shortcut">⌘K</kbd>
+  </div>
+  <div id="search-results" class="search-results" style="display: none;"></div>
+</div>
+
+<style>
+  .search-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-box:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .search-icon {
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+
+  .search-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    color: var(--color-text);
+  }
+
+  .search-box input::placeholder {
+    color: var(--color-text-secondary);
+  }
+
+  .search-shortcut {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    font-family: inherit;
+  }
+
+  .search-results {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 200;
+  }
+
+  .search-result-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .search-result-item:hover {
+    background: var(--color-bg-secondary);
+  }
+
+  .search-result-item:last-child {
+    border-bottom: none;
+  }
+
+  .search-result-title {
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 0.25rem;
+  }
+
+  .search-result-excerpt {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .search-result-highlight {
+    background: rgba(59, 130, 246, 0.2);
+    padding: 0 0.125rem;
+    border-radius: 0.125rem;
+  }
+
+  .search-no-results {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 640px) {
+    .search-shortcut {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const searchInput = document.getElementById('search-input') as HTMLInputElement
+  const searchResults = document.getElementById('search-results') as HTMLDivElement
+
+  // 键盘快捷键
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault()
+      searchInput.focus()
+    }
+    if (e.key === 'Escape') {
+      searchInput.blur()
+      searchResults.style.display = 'none'
+    }
+  })
+
+  // 搜索功能
+  searchInput.addEventListener('input', async () => {
+    const query = searchInput.value.trim()
+
+    if (!query) {
+      searchResults.style.display = 'none'
+      return
+    }
+
+    // 使用内置的搜索索引
+    const index = (window as any).__SEARCH_INDEX__ || []
+    const results = performSearch(query, index)
+
+    displayResults(results)
+  })
+
+  function performSearch(query: string, index: any[]) {
+    const terms = query.toLowerCase().split(/\s+/)
+
+    return index
+      .map((doc: any) => {
+        let score = 0
+        const titleLower = doc.title.toLowerCase()
+        const contentLower = doc.content.toLowerCase()
+
+        for (const term of terms) {
+          if (titleLower.includes(term)) score += 10
+          if (contentLower.includes(term)) score += 1
+        }
+
+        return { doc, score }
+      })
+      .filter(({ score }: any) => score > 0)
+      .sort((a: any, b: any) => b.score - a.score)
+      .map(({ doc }: any) => doc)
+      .slice(0, 10)
+  }
+
+  function displayResults(results: any[]) {
+    if (results.length === 0) {
+      searchResults.innerHTML = '<div class="search-no-results">未找到相关文档</div>'
+      searchResults.style.display = 'block'
+      return
+    }
+
+    searchResults.innerHTML = results.map(doc => {
+      const excerpt = doc.content.slice(0, 100) + '...'
+      return `
+        <a href="/posts/${doc.slug}" class="search-result-item">
+          <div class="search-result-title">${highlightTerm(doc.title, searchInput.value)}</div>
+          <div class="search-result-excerpt">${highlightTerm(excerpt, searchInput.value)}</div>
+        </a>
+      `
+    }).join('')
+
+    searchResults.style.display = 'block'
+  }
+
+  function highlightTerm(text: string, term: string) {
+    if (!term) return text
+    const regex = new RegExp(`(${term})`, 'gi')
+    return text.replace(regex, '<span class="search-result-highlight">$1</span>')
+  }
+
+  // 点击外部关闭搜索结果
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+      searchResults.style.display = 'none'
+    }
+  })
+</script>

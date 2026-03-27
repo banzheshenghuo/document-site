@@ -1,0 +1,107 @@
+---
+export interface Props {
+  slug: string
+  title: string
+  description?: string
+  date?: string
+  tags?: string[]
+}
+
+const {
+  slug,
+  title,
+  description,
+  date,
+  tags = []
+} = Astro.props
+---
+
+<article class="doc-card">
+  <a href={`/posts/${slug}`} class="doc-card-link">
+    <div class="doc-card-content">
+      <h2 class="doc-card-title">{title}</h2>
+      {description && (
+        <p class="doc-card-description">{description}</p>
+      )}
+      <div class="doc-card-meta">
+        {date && <time class="doc-card-date">{date}</time>}
+        {tags.length > 0 && (
+          <div class="doc-card-tags">
+            {tags.map(tag => (
+              <span class="doc-card-tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .doc-card {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  }
+
+  .doc-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  .doc-card-link {
+    display: block;
+    color: inherit;
+  }
+
+  .doc-card-content {
+    padding: 1.5rem;
+  }
+
+  .doc-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .doc-card-description {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .doc-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .doc-card-date {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .doc-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .doc-card-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    background: var(--color-bg-secondary);
+    border-radius: 9999px;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+  }
+</style>
