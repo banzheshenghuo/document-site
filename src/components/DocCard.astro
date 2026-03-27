@@ -14,10 +14,12 @@ const {
   date,
   tags = []
 } = Astro.props
+
+const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
 ---
 
 <article class="doc-card">
-  <a href={`posts/${slug}`} class="doc-card-link">
+  <a href={`${basePath}/posts/${slug}`} class="doc-card-link">
     <div class="doc-card-content">
       <h2 class="doc-card-title">{title}</h2>
       {description && (
