@@ -191,8 +191,9 @@
 
     searchResults.innerHTML = results.map(doc => {
       const excerpt = doc.content.slice(0, 100) + '...'
+      const basePath = document.documentElement.dataset.base || ''
       return `
-        <a href="/posts/${doc.slug}" class="search-result-item">
+        <a href="${basePath}posts/${doc.slug}" class="search-result-item">
           <div class="search-result-title">${highlightTerm(doc.title, searchInput.value)}</div>
           <div class="search-result-excerpt">${highlightTerm(excerpt, searchInput.value)}</div>
         </a>
