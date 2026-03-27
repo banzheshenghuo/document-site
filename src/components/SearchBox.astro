@@ -210,7 +210,8 @@
 
   // 点击外部关闭搜索结果
   document.addEventListener('click', (e) => {
-    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+    const target = e.target as Node
+    if (!searchInput.contains(target) && !searchResults.contains(target)) {
       searchResults.style.display = 'none'
     }
   })
