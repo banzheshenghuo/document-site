@@ -122,7 +122,7 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
 
     <!-- Search -->
     <script is:inline>
-      window.__SEARCH_INDEX__ = []
+      window.__SEARCH_INDEX__ = window.__SEARCH_INDEX__ || []
     </script>
   </body>
 </html>
