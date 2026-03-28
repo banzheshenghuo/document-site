@@ -115,7 +115,6 @@ erDiagram
         decimal price
         int stock
     }
-}
 ```
 
 ### 1.5 状态图 (State Diagram)
