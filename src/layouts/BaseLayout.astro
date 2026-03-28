@@ -26,89 +26,6 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     <link rel="icon" type="image/svg+xml" href={`${basePath}favicon.svg`} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-
-    <!-- Mermaid JS -->
-    <script type="module" is:inline>
-      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs'
-
-      // 获取当前主题
-      const getTheme = () => {
-        const stored = localStorage?.getItem('theme')
-        if (stored) return stored === 'dark' ? 'dark' : 'default'
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
-      }
-
-      // 初始化 Mermaid
-      mermaid.initialize({
-        startOnLoad: true,
-        theme: getTheme(),
-        securityLevel: 'loose',
-        // 流程图配置
-        flowchart: {
-          useMaxWidth: true,
-          htmlLabels: true,
-          curve: 'basis'
-        },
-        // 序列图配置
-        sequence: {
-          useMaxWidth: true,
-          diagramMarginX: 10,
-          diagramMarginY: 10,
-          actorMargin: 50,
-          width: 150,
-          height: 65,
-          boxMargin: 10,
-          messageMargin: 35,
-          mirrorActors: false,
-          bottomMarginAdj: 1,
-          useMaxWidth: true
-        },
-        // 类图配置
-        class: {
-          useMaxWidth: true
-        },
-        // 状态图配置
-        state: {
-          useMaxWidth: true
-        },
-        // ER图配置
-        er: {
-          useMaxWidth: true
-        },
-        // 思维导图配置
-        mindmap: {
-          useMaxWidth: true,
-          padding: 10
-        },
-        // 时间线配置
-        timeline: {
-          useMaxWidth: true
-        },
-        // 甘特图配置
-        gantt: {
-          useMaxWidth: true
-        }
-      })
-
-      // 监听主题变化
-      const observer = new MutationObserver(() => {
-        const theme = document.documentElement.dataset.theme
-        if (theme) {
-          mermaid.initialize({ theme: theme === 'dark' ? 'dark' : 'default' })
-          mermaid.init(undefined, '.mermaid')
-        }
-      })
-
-      observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['data-theme']
-      })
-    </script>
-
-    <!-- Search -->
-    <script is:inline>
-      window.__SEARCH_INDEX__ = []
-    </script>
   </head>
   <body>
     <div class="layout">
@@ -141,6 +58,71 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
           localStorage.setItem('theme', newTheme)
         })
       })
+    </script>
+
+    <!-- Mermaid JS - 必须放在 DOM 加载后 -->
+    <script type="module" is:inline>
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs'
+
+      // 获取当前主题
+      const getTheme = () => {
+        const stored = localStorage?.getItem('theme')
+        if (stored) return stored === 'dark' ? 'dark' : 'default'
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
+      }
+
+      // 初始化 Mermaid
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: getTheme(),
+        securityLevel: 'loose',
+        logLevel: 'error',
+        flowchart: {
+          useMaxWidth: true,
+          htmlLabels: true,
+          curve: 'basis'
+        },
+        sequence: {
+          useMaxWidth: true
+        },
+        class: {
+          useMaxWidth: true
+        },
+        state: {
+          useMaxWidth: true
+        },
+        er: {
+          useMaxWidth: true
+        },
+        mindmap: {
+          useMaxWidth: true
+        },
+        gantt: {
+          useMaxWidth: true
+        }
+      })
+
+      // 手动初始化所有 mermaid 元素
+      mermaid.init(undefined, document.querySelectorAll('.mermaid'))
+
+      // 监听主题变化
+      const observer = new MutationObserver(() => {
+        const theme = document.documentElement.dataset.theme
+        if (theme) {
+          mermaid.initialize({ theme: theme === 'dark' ? 'dark' : 'default' })
+          mermaid.init(undefined, document.querySelectorAll('.mermaid'))
+        }
+      })
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+      })
+    </script>
+
+    <!-- Search -->
+    <script is:inline>
+      window.__SEARCH_INDEX__ = []
     </script>
   </body>
 </html>
