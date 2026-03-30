@@ -1,5 +1,5 @@
 ---
-title: '欢迎使用 AI 文档库'
+title: '欢迎使用安昙的知识库'
 description: '这是一个基于 Astro 构建的轻量级文档网站，支持 Markdown、Mermaid 图表、代码高亮等功能。'
 date: '2026-03-27'
 tags: ['入门', '文档']
