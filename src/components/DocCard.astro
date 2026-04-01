@@ -16,12 +16,32 @@ const {
 } = Astro.props
 
 const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+
+// 从标题中提取前缀
+function getPrefix(title: string) {
+  const match = title.match(/^\[([^\]]+)\](.*)$/)
+  return match ? { prefix: match[1], titleWithoutPrefix: match[2] } : { prefix: null, titleWithoutPrefix: title }
+}
+
+// 获取前缀类型
+function getPrefixType(prefix: string | null): 'read' | 'collect' | null {
+  if (!prefix) return null
+  if (prefix === '精读' || prefix === '解读' || prefix === '深度') return 'read'
+  if (prefix === '收藏' || prefix === '归档' || prefix === '书签') return 'collect'
+  return null
+}
+
+const { prefix, titleWithoutPrefix } = getPrefix(title)
+const prefixType = getPrefixType(prefix)
 ---
 
-<article class="doc-card">
+<article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`}>
   <a href={`${basePath}/posts/${slug}`} class="doc-card-link">
     <div class="doc-card-content">
-      <h2 class="doc-card-title">{title}</h2>
+      <h2 class="doc-card-title">
+        {prefix && <span class="doc-card-prefix">{prefix}</span>}
+        {titleWithoutPrefix}
+      </h2>
       {description && (
         <p class="doc-card-description">{description}</p>
       )}
@@ -68,6 +88,28 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--color-text);
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .doc-card-prefix {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .doc-card-prefix--read {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+  }
+
+  .doc-card-prefix--collect {
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    color: white;
   }
 
   .doc-card-description {
