@@ -35,16 +35,41 @@ const todayDocs = sortedDocs.filter(doc => {
   return docToday.getTime() === today.getTime()
 })
 
+// 初始化活动标签
+let activeTab = 'all'
+
+// 获取当前标签对应的文档
+function getActiveDocs() {
+  switch (activeTab) {
+    case 'read':
+      return sortedDocs.filter((doc: any) => {
+        const title = doc.data.title || ''
+        return title.includes('[精读]') || title.includes('[解读]')
+      })
+    case 'collect':
+      return sortedDocs.filter((doc: any) => {
+        const title = doc.data.title || ''
+        return title.includes('[收藏]') || title.includes('[归档]') || title.includes('[书签]')
+      })
+    case 'today':
+      return sortedDocs.filter((doc: any) => {
+        if (!doc.data.date) return false
+        const docDate = new Date(doc.data.date)
+        const docToday = new Date(docDate.getFullYear(), docDate.getMonth(), docDate.getDate())
+        return docToday.getTime() === today.getTime()
+      })
+    default:
+      return sortedDocs
+  }
+}
+
 // 构建搜索索引
 const searchIndex = sortedDocs.map(doc => ({
   slug: doc.slug,
   title: doc.data.title,
   description: doc.data.description || '',
   tags: (doc.data.tags || []).join(' '),
-  date: doc.data.date || '',
-  type: doc.data.title?.includes('[精读]') || doc.data.title?.includes('[解读]') ? '精读' :
-        doc.data.title?.includes('[收藏]') || doc.data.title?.includes('[归档]') || doc.data.title?.includes('[书签]') ? '收藏' :
-        '其他'
+  date: doc.data.date || ''
 }))
 ---
 
@@ -61,29 +86,33 @@ const searchIndex = sortedDocs.map(doc => ({
       <h2 class="section-title">
         <div class="tabs-container">
           <button
+            id={`tab-all-${activeTab === 'all' ? 'active' : ''}`}
             class={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
-            onclick="window.setActiveTab('all')"
+            onclick={`window.setActiveTab('all')`}
             data-tab="all"
           >
             全部 <span class="tab-count">({sortedDocs.length})</span>
           </button>
           <button
+            id={`tab-read-${activeTab === 'read' ? 'active' : ''}`}
             class={`tab-button ${activeTab === 'read' ? 'active' : ''}`}
-            onclick="window.setActiveTab('read')"
+            onclick={`window.setActiveTab('read')`}
             data-tab="read"
           >
             📚 精读 <span class="tab-count">({readDocs.length})</span>
           </button>
           <button
+            id={`tab-collect-${activeTab === 'collect' ? 'active' : ''}`}
             class={`tab-button ${activeTab === 'collect' ? 'active' : ''}`}
-            onclick="window.setActiveTab('collect')"
+            onclick={`window.setActiveTab('collect')`}
             data-tab="collect"
           >
             ⭐ 收藏 <span class="tab-count">({collectDocs.length})</span>
           </button>
           <button
+            id={`tab-today-${activeTab === 'today' ? 'active' : ''}`}
             class={`tab-button ${activeTab === 'today' ? 'active' : ''}`}
-            onclick="window.setActiveTab('today')"
+            onclick={`window.setActiveTab('today')`}
             data-tab="today"
           >
             📅 今天 <span class="tab-count">({todayDocs.length})</span>
@@ -91,8 +120,8 @@ const searchIndex = sortedDocs.map(doc => ({
         </div>
       </h2>
 
-      <div class="docs-grid">
-        {activeDocs.map(doc => (
+      <div class="docs-grid" id="docs-grid">
+        {getActiveDocs().map(doc => (
           <DocCard
             slug={doc.slug}
             title={doc.data.title}
@@ -103,8 +132,8 @@ const searchIndex = sortedDocs.map(doc => ({
         ))}
       </div>
 
-      {activeDocs.length === 0 && (
-        <div class="empty-state">
+      {getActiveDocs().length === 0 && (
+        <div class="empty-state" id="empty-state">
           <p>{getEmptyMessage()}</p>
         </div>
       )}
@@ -112,45 +141,44 @@ const searchIndex = sortedDocs.map(doc => ({
   </div>
 
   <script>
-    let activeTab = 'all'
+    // 全局变量
+    window.__ACTIVE_DOCS__ = null
 
-    function setActiveTab(tab: string) {
-      activeTab = tab
-      updateActiveDocs()
+    // 切换标签
+    window.setActiveTab = function(tab) {
+      window.__ACTIVE_DOCS__ = getDocsByTab(tab)
       updateTabButtons()
-    }
-
-    function updateActiveDocs() {
-      const docs = getAllDocs()
-      switch (activeTab) {
-        case 'read':
-          window.__ACTIVE_DOCS__ = docs.filter((doc: any) => {
-            const title = doc.data.title || ''
-            return title.includes('[精读]') || title.includes('[解读]')
-          })
-          break
-        case 'collect':
-          window.__ACTIVE_DOCS__ = docs.filter((doc: any) => {
-            const title = doc.data.title || ''
-            return title.includes('[收藏]') || title.includes('[归档]') || title.includes('[书签]')
-          })
-          break
-        case 'today':
-          const now = new Date()
-          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-          window.__ACTIVE_DOCS__ = docs.filter((doc: any) => {
-            if (!doc.data.date) return false
-            const docDate = new Date(doc.data.date)
-            const docToday = new Date(docDate.getFullYear(), docDate.getMonth(), docDate.getDate())
-            return docToday.getTime() === today.getTime()
-          })
-          break
-        default:
-          window.__ACTIVE_DOCS__ = docs
-      }
       renderDocs()
     }
 
+    // 获取指定标签的文档
+    function getDocsByTab(tab) {
+      switch (tab) {
+        case 'read':
+          return window.__SEARCH_INDEX__.filter((doc: any) => {
+            const title = doc.title
+            return title.includes('[精读]') || title.includes('[解读]')
+          })
+        case 'collect':
+          return window.__SEARCH_INDEX__.filter((doc: any) => {
+            const title = doc.title
+            return title.includes('[收藏]') || title.includes('[归档]') || title.includes('[书签]')
+          })
+        case 'today':
+          const now = new Date()
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+          return window.__SEARCH_INDEX__.filter((doc: any) => {
+            if (!doc.date) return false
+            const docDate = new Date(doc.date)
+            const docToday = new Date(docDate.getFullYear(), docDate.getMonth(), docDate.getDate())
+            return docToday.getTime() === today.getTime()
+          })
+        default:
+          return window.__SEARCH_INDEX__
+      }
+    }
+
+    // 更新标签按钮状态
     function updateTabButtons() {
       document.querySelectorAll('.tab-button').forEach(btn => {
         const tab = btn.getAttribute('data-tab')
@@ -162,21 +190,10 @@ const searchIndex = sortedDocs.map(doc => ({
       })
     }
 
-    function getAllDocs() {
-      return window.__SEARCH_INDEX__.map((item: any) => ({
-        slug: item.slug,
-        data: {
-          title: item.title,
-          description: item.description,
-          date: item.date,
-          tags: item.tags ? item.tags.split(' ') : []
-        }
-      }))
-    }
-
+    // 渲染文档列表
     function renderDocs() {
-      const container = document.querySelector('.docs-grid')
-      const emptyState = document.querySelector('.empty-state')
+      const container = document.getElementById('docs-grid')
+      const emptyState = document.getElementById('empty-state')
 
       if (!container) return
 
@@ -200,13 +217,13 @@ const searchIndex = sortedDocs.map(doc => ({
         <article class="doc-card">
           <a href="/posts/${doc.slug}" class="doc-card-link">
             <div class="doc-card-content">
-              <h2 class="doc-card-title">${doc.data.title}</h2>
-              ${doc.data.description ? `<p class="doc-card-description">${doc.data.description}</p>` : ''}
+              <h2 class="doc-card-title">${doc.title}</h2>
+              ${doc.description ? `<p class="doc-card-description">${doc.description}</p>` : ''}
               <div class="doc-card-meta">
-                ${doc.data.date ? `<time class="doc-card-date">${formatDate(doc.data.date)}</time>` : ''}
-                ${doc.data.tags && doc.data.tags.length > 0 ? `
+                ${doc.date ? `<time class="doc-card-date">${formatDate(doc.date)}</time>` : ''}
+                ${doc.tags && doc.tags.length > 0 ? `
                   <div class="doc-card-tags">
-                    ${doc.data.tags.map((tag: string) => `<span class="doc-card-tag">${tag}</span>`).join('')}
+                    ${doc.tags.map((tag: string) => `<span class="doc-card-tag">${tag}</span>`).join('')}
                   </div>
                 ` : ''}
               </div>
@@ -216,6 +233,7 @@ const searchIndex = sortedDocs.map(doc => ({
       `).join('')
     }
 
+    // 格式化日期
     function formatDate(dateStr: string): string {
       const date = new Date(dateStr)
       return date.toLocaleDateString('zh-CN', {
@@ -227,6 +245,7 @@ const searchIndex = sortedDocs.map(doc => ({
       })
     }
 
+    // 获取空状态消息
     function getEmptyMessage(): string {
       switch (activeTab) {
         case 'read':
@@ -240,21 +259,24 @@ const searchIndex = sortedDocs.map(doc => ({
       }
     }
 
-    // 初始化
-    window.setActiveTab = setActiveTab
-    window.__ACTIVE_DOCS__ = {sortedDocs.map(doc => ({
-      slug: doc.slug,
-      data: {
-        title: doc.data.title,
-        description: doc.data.description,
-        date: doc.data.date,
-        tags: doc.data.tags
+    // 页面加载完成后初始化
+    window.addEventListener('DOMContentLoaded', function() {
+      // 初始化活动文档
+      window.__ACTIVE_DOCS__ = window.__SEARCH_INDEX__
+      // 初始化活动标签
+      window.setActiveTab = function(tab) {
+        window.__ACTIVE_DOCS__ = getDocsByTab(tab)
+        updateTabButtons()
+        renderDocs()
       }
-    }))}
-    renderDocs()
+      // 初始化标签状态
+      updateTabButtons()
+      // 初始渲染
+      renderDocs()
+    })
   </script>
 
-  <script define:vars={{ searchIndex, activeDocs: sortedDocs }}>
+  <script define:vars={{ searchIndex }}>
     window.__SEARCH_INDEX__ = searchIndex
   </script>
 </BaseLayout>
@@ -302,6 +324,7 @@ const searchIndex = sortedDocs.map(doc => ({
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+    justify-content: center;
   }
 
   .tab-button {
