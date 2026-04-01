@@ -106,7 +106,7 @@ let activeTab = 'all'
 
       {activeDocs.length === 0 && (
         <div class="empty-state">
-          <p>{getEmptyMessage()}</p>
+          {getEmptyMessage(activeTab)}
         </div>
       )}
     </section>
@@ -116,6 +116,19 @@ let activeTab = 'all'
     // 获取今天的日期
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+    function getEmptyMessage(tab) {
+      switch (tab) {
+        case 'read':
+          return '暂无精读文章'
+        case 'collect':
+          return '暂无收藏文章'
+        case 'today':
+          return '今天还没有添加新文章'
+        default:
+          return '暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。'
+      }
+    }
 
     function switchTab(tab) {
       activeTab = tab
