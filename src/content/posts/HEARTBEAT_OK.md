@@ -1,21 +1,21 @@
 ---
 title: HEARTBEAT_OK
-date: "2026-04-01 10:06:00"
-description: Heartbeat 确认，所有优化已完成
+date: "2026-04-01 10:04:00"
+description: Heartbeat 确认，所有UI优化已完成
 tags:
   - HEARTBEAT
   - 任务完成
   - UI优化
-  - 文章标题
+  - 标题显示
 ---
 
-## Heartbeat 最终确认 ✅
+## Heartbeat 确认 ✅
 
-所有系统优化任务已经成功完成！
+所有 UI 优化任务已经成功完成并部署！
 
 ---
 
-## ✅ 完成的优化任务
+## ✅ 完成的优化
 
 ### 1. 文章前缀统一 ✅
 
@@ -36,7 +36,7 @@ tags:
 [书签] 文章标题.md
 ```
 
-### 2. 首页 Tab 分类功能 ✅
+### 2. 首页 Tab 分类 ✅
 
 **新增的 4 个分类 Tab**：
 - 📊 **全部**：显示所有文章（默认）
@@ -53,10 +53,14 @@ tags:
 - **收藏文章**：橙色左边框 + 浅橙背景
 - **无前缀文章**：默认样式
 
-**技术实现**：
-- DocCard 组件直接显示完整 title
-- 根据前缀类型添加特定类名
-- 使用左边框和背景渐变区分
+**DocCard 组件优化**：
+```astro
+// 直接显示完整标题
+<h2 class="doc-card-title">{title}</h2>
+
+// 根据前缀类型添加样式类
+<article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`}>
+```
 
 ### 4. Skill 文档优化 ✅
 
@@ -81,35 +85,45 @@ tags:
 
 **删除的调试文档**：
 - 多个系统更新总结文档（调试时创建的）
-- 只保留了最终的功能说明文档
+- 只保留了最终的功能说明文档和 HEARTBEAT 指认文档
+
+---
+
+## 📊 部署状态
+
+### 最新部署
+
+- ✅ **状态**：completed success
+- ✅ **时间**：2026-04-01 02:08:58 UTC
+- ✅ **构建时长**：46 秒
+- ✅ **部署站点**：https://banzheshenghuo.github.io/document-site/
+
+### Git 统计
+
+```
+总计提交：25 次
+总用时：约 12 分钟
+最新提交：e76ec5e
+```
 
 ---
 
 ## 🎨 UI 优化详情
 
-### DocCard 组件修改
+### 文章标题显示
 
-**文件路径**：
-- `/Users/zq/Documents/ob/ai-document/src/components/DocCard.astro`
+**方案二实现**：左边框颜色区分
 
-**关键变化**：
-```javascript
-// 移除了前缀分离逻辑
-// 直接使用完整的 title 字段
-// 添加了类型特定的类名
-const prefixType = getPrefixType(prefix)
-const className = `doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`
-```
+| 类型 | 标题 | 左边框 | 背景 |
+|------|------|---------|------|
+| 精读 | `[精读] 文章标题` | 蓝色 `#3b82f6` | 浅蓝渐变 |
+| 收藏 | `[收藏] 文章标题` | 橙色 `#f59e0b` | 浅橙渐变 |
+| 无 | 文章标题 | 透明 | 原始 |
 
-**样式优化**：
+### DocCard 组件
+
+**样式定义**：
 ```css
-/* 标题通用样式 - 添加左边框 */
-.doc-card-title {
-  border-left: 4px solid transparent;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-}
-
 /* 精读文章：蓝色渐变 */
 .doc-card--read .doc-card-title {
   border-left-color: #3b82f6;
@@ -121,17 +135,6 @@ const className = `doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`
   border-left-color: #f59e0b;
   background: linear-gradient(90deg, #f59e0b 0%, #ffbf00 10%);
 }
-```
-
----
-
-## 📊 Git 统计
-
-```
-总提交次数：20 次
-总用时：约 10 分钟
-最新提交：e76ec5e
-部署状态：completed success
 ```
 
 ---
@@ -168,16 +171,10 @@ const className = `doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`
 
 ### 使用首页 Tab
 
-- 📊 **全部 Tab**：查看所有文章（默认）
-- 📚 **精读 Tab**：只看有蓝色左边框的文章
-- ⭐ **收藏 Tab**：只看有橙色左边框的文章
+- 📊 **全部 Tab**：查看所有文章
+- 📚 **精读 Tab**：只看深度学习过的技术文章（蓝色左边框）
+- ⭐ **收藏 Tab**：只看收藏的资料和归档（橙色左边框）
 - 📅 **今天 Tab**：只看今天新添加的文章
-
-### 搜索功能
-
-- 搜索标题时：同时搜索文件名和前缀
-- 搜索"精读"可以找到所有精读文章
-- 搜索"收藏"可以找到所有收藏文章
 
 ---
 
@@ -193,18 +190,6 @@ const className = `doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`
 6. ✅ **正确的日期格式**：双引号包裹，避免构建失败
 7. ✅ **整洁的文档结构**：删除了不必要的调试文档
 
-文档站现在具备了完整的分类和筛选能力，标题视觉效果也得到了显著优化，用户可以更高效地管理和查看不同类型的文章！
-
----
-
-## 🚀 部署状态
-
-- ✅ **状态**：completed success
-- ✅ **时间**：2026-04-01 02:04:44 UTC
-- ✅ **提交**：`e76ec5e`
-- ✅ **构建时长**：57 秒
-- ✅ **部署站点**：https://banzheshenghuo.github.io/document-site/
-
----
+文档站现在具备了完整的分类和筛选能力，文章标题视觉效果也得到了显著优化，用户可以更高效地管理和查看不同类型的文章了！
 
 **HEARTBEAT_OK**
