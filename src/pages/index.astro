@@ -106,7 +106,10 @@ let activeTab = 'all'
 
       {activeDocs.length === 0 && (
         <div class="empty-state">
-          {getEmptyMessage(activeTab)}
+          {activeTab === 'read' && <p>暂无精读文章</p>}
+          {activeTab === 'collect' && <p>暂无收藏文章</p>}
+          {activeTab === 'today' && <p>今天还没有添加新文章</p>}
+          {activeTab === 'all' && <p>暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。</p>}
         </div>
       )}
     </section>
@@ -119,19 +122,6 @@ let activeTab = 'all'
 
     // 默认活动标签
     let activeTab = 'all'
-
-    function getEmptyMessage(tab) {
-      switch (tab) {
-        case 'read':
-          return '暂无精读文章'
-        case 'collect':
-          return '暂无收藏文章'
-        case 'today':
-          return '今天还没有添加新文章'
-        default:
-          return '暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。'
-      }
-    }
 
     function switchTab(tab) {
       activeTab = tab
