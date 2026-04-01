@@ -14,13 +14,37 @@ const sortedDocs = allDocs.sort((a, b) => {
   return dateB - dateA
 })
 
+// 分类文档
+const readDocs = sortedDocs.filter(doc => {
+  const title = doc.data.title || ''
+  return title.includes('[精读]') || title.includes('[解读]')
+})
+
+const collectDocs = sortedDocs.filter(doc => {
+  const title = doc.data.title || ''
+  return title.includes('[收藏]') || title.includes('[归档]') || title.includes('[书签]')
+})
+
+// 今天的文档（24小时内）
+const now = new Date()
+const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+const todayDocs = sortedDocs.filter(doc => {
+  if (!doc.data.date) return false
+  const docDate = new Date(doc.data.date)
+  const docToday = new Date(docDate.getFullYear(), docDate.getMonth(), docDate.getDate())
+  return docToday.getTime() === today.getTime()
+})
+
 // 构建搜索索引
 const searchIndex = sortedDocs.map(doc => ({
   slug: doc.slug,
   title: doc.data.title,
   description: doc.data.description || '',
   tags: (doc.data.tags || []).join(' '),
-  date: doc.data.date || ''
+  date: doc.data.date || '',
+  type: doc.data.title?.includes('[精读]') || doc.data.title?.includes('[解读]') ? '精读' :
+        doc.data.title?.includes('[收藏]') || doc.data.title?.includes('[归档]') || doc.data.title?.includes('[书签]') ? '收藏' :
+        '其他'
 }))
 ---
 
@@ -35,12 +59,40 @@ const searchIndex = sortedDocs.map(doc => ({
 
     <section class="docs-section">
       <h2 class="section-title">
-        全部文档
-        <span class="doc-count">({sortedDocs.length})</span>
+        <div class="tabs-container">
+          <button
+            class={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
+            onclick="window.setActiveTab('all')"
+            data-tab="all"
+          >
+            全部 <span class="tab-count">({sortedDocs.length})</span>
+          </button>
+          <button
+            class={`tab-button ${activeTab === 'read' ? 'active' : ''}`}
+            onclick="window.setActiveTab('read')"
+            data-tab="read"
+          >
+            📚 精读 <span class="tab-count">({readDocs.length})</span>
+          </button>
+          <button
+            class={`tab-button ${activeTab === 'collect' ? 'active' : ''}`}
+            onclick="window.setActiveTab('collect')"
+            data-tab="collect"
+          >
+            ⭐ 收藏 <span class="tab-count">({collectDocs.length})</span>
+          </button>
+          <button
+            class={`tab-button ${activeTab === 'today' ? 'active' : ''}`}
+            onclick="window.setActiveTab('today')"
+            data-tab="today"
+          >
+            📅 今天 <span class="tab-count">({todayDocs.length})</span>
+          </button>
+        </div>
       </h2>
 
       <div class="docs-grid">
-        {sortedDocs.map(doc => (
+        {activeDocs.map(doc => (
           <DocCard
             slug={doc.slug}
             title={doc.data.title}
@@ -51,15 +103,158 @@ const searchIndex = sortedDocs.map(doc => ({
         ))}
       </div>
 
-      {sortedDocs.length === 0 && (
+      {activeDocs.length === 0 && (
         <div class="empty-state">
-          <p>暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。</p>
+          <p>{getEmptyMessage()}</p>
         </div>
       )}
     </section>
   </div>
 
-  <script define:vars={{ searchIndex }}>
+  <script>
+    let activeTab = 'all'
+
+    function setActiveTab(tab: string) {
+      activeTab = tab
+      updateActiveDocs()
+      updateTabButtons()
+    }
+
+    function updateActiveDocs() {
+      const docs = getAllDocs()
+      switch (activeTab) {
+        case 'read':
+          window.__ACTIVE_DOCS__ = docs.filter((doc: any) => {
+            const title = doc.data.title || ''
+            return title.includes('[精读]') || title.includes('[解读]')
+          })
+          break
+        case 'collect':
+          window.__ACTIVE_DOCS__ = docs.filter((doc: any) => {
+            const title = doc.data.title || ''
+            return title.includes('[收藏]') || title.includes('[归档]') || title.includes('[书签]')
+          })
+          break
+        case 'today':
+          const now = new Date()
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+          window.__ACTIVE_DOCS__ = docs.filter((doc: any) => {
+            if (!doc.data.date) return false
+            const docDate = new Date(doc.data.date)
+            const docToday = new Date(docDate.getFullYear(), docDate.getMonth(), docDate.getDate())
+            return docToday.getTime() === today.getTime()
+          })
+          break
+        default:
+          window.__ACTIVE_DOCS__ = docs
+      }
+      renderDocs()
+    }
+
+    function updateTabButtons() {
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        const tab = btn.getAttribute('data-tab')
+        if (tab === activeTab) {
+          btn.classList.add('active')
+        } else {
+          btn.classList.remove('active')
+        }
+      })
+    }
+
+    function getAllDocs() {
+      return window.__SEARCH_INDEX__.map((item: any) => ({
+        slug: item.slug,
+        data: {
+          title: item.title,
+          description: item.description,
+          date: item.date,
+          tags: item.tags ? item.tags.split(' ') : []
+        }
+      }))
+    }
+
+    function renderDocs() {
+      const container = document.querySelector('.docs-grid')
+      const emptyState = document.querySelector('.empty-state')
+
+      if (!container) return
+
+      const docs = window.__ACTIVE_DOCS__ || []
+
+      if (docs.length === 0) {
+        container.innerHTML = ''
+        if (emptyState) {
+          emptyState.style.display = 'block'
+          const p = emptyState.querySelector('p')
+          if (p) p.textContent = getEmptyMessage()
+        }
+        return
+      }
+
+      if (emptyState) {
+        emptyState.style.display = 'none'
+      }
+
+      container.innerHTML = docs.map((doc: any) => `
+        <article class="doc-card">
+          <a href="/posts/${doc.slug}" class="doc-card-link">
+            <div class="doc-card-content">
+              <h2 class="doc-card-title">${doc.data.title}</h2>
+              ${doc.data.description ? `<p class="doc-card-description">${doc.data.description}</p>` : ''}
+              <div class="doc-card-meta">
+                ${doc.data.date ? `<time class="doc-card-date">${formatDate(doc.data.date)}</time>` : ''}
+                ${doc.data.tags && doc.data.tags.length > 0 ? `
+                  <div class="doc-card-tags">
+                    ${doc.data.tags.map((tag: string) => `<span class="doc-card-tag">${tag}</span>`).join('')}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </a>
+        </article>
+      `).join('')
+    }
+
+    function formatDate(dateStr: string): string {
+      const date = new Date(dateStr)
+      return date.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
+    function getEmptyMessage(): string {
+      switch (activeTab) {
+        case 'read':
+          return '暂无精读文章'
+        case 'collect':
+          return '暂无收藏文章'
+        case 'today':
+          return '今天还没有添加新文章'
+        default:
+          return '暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。'
+      }
+    }
+
+    // 初始化
+    window.setActiveTab = setActiveTab
+    window.__ACTIVE_DOCS__ = {sortedDocs.map(doc => ({
+      slug: doc.slug,
+      data: {
+        title: doc.data.title,
+        description: doc.data.description,
+        date: doc.data.date,
+        tags: doc.data.tags
+      }
+    }))}
+    renderDocs()
+  </script>
+
+  <script define:vars={{ searchIndex, activeDocs: sortedDocs }}>
     window.__SEARCH_INDEX__ = searchIndex
   </script>
 </BaseLayout>
@@ -103,10 +298,41 @@ const searchIndex = sortedDocs.map(doc => ({
     gap: 0.5rem;
   }
 
-  .doc-count {
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-    font-weight: 400;
+  .tabs-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    padding: 0.625rem 1.25rem;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .tab-button:hover {
+    border-color: var(--color-primary);
+    background: var(--color-bg-secondary);
+  }
+
+  .tab-button.active {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .tab-count {
+    font-size: 0.8125rem;
+    opacity: 0.9;
   }
 
   .docs-grid {
@@ -131,6 +357,15 @@ const searchIndex = sortedDocs.map(doc => ({
   @media (max-width: 640px) {
     .hero h1 {
       font-size: 2rem;
+    }
+
+    .tabs-container {
+      justify-content: center;
+    }
+
+    .tab-button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
     }
 
     .docs-grid {
