@@ -113,6 +113,10 @@ let activeTab = 'all'
   </div>
 
   <script is:inline>
+    // 获取今天的日期
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
     function switchTab(tab) {
       activeTab = tab
       
@@ -154,7 +158,21 @@ let activeTab = 'all'
         if (emptyState) {
           emptyState.style.display = 'block'
           const p = emptyState.querySelector('p')
-          if (p) p.textContent = getEmptyMessage()
+          if (p) {
+            switch (activeTab) {
+              case 'read':
+                p.textContent = '暂无精读文章'
+                break
+              case 'collect':
+                p.textContent = '暂无收藏文章'
+                break
+              case 'today':
+                p.textContent = '今天还没有添加新文章'
+                break
+              default:
+                p.textContent = '暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。'
+            }
+          }
         }
         return
       }
@@ -195,30 +213,6 @@ let activeTab = 'all'
         } else {
           card.style.display = 'none'
         }
-      })
-    }
-    
-    function getEmptyMessage() {
-      switch (activeTab) {
-        case 'read':
-          return '暂无精读文章'
-        case 'collect':
-          return '暂无收藏文章'
-        case 'today':
-          return '今天还没有添加新文章'
-        default:
-          return '暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。'
-      }
-    }
-    
-    function formatDate(dateStr) {
-      const date = new Date(dateStr)
-      return date.toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
       })
     }
   </script>
