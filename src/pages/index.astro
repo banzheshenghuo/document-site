@@ -126,22 +126,7 @@ let activeTab = 'all'
 
     function switchTab(tab) {
       activeTab = tab
-      activeTab = tab
-      
-      switch (tab) {
-        case 'read':
-          activeDocs = readDocs
-          break
-        case 'collect':
-          activeDocs = collectDocs
-          break
-        case 'today':
-          activeDocs = todayDocs
-          break
-        default:
-          activeDocs = sortedDocs
-      }
-      
+
       updateTabButtons()
       updateDocGrid()
     }
