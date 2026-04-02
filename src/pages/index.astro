@@ -145,36 +145,13 @@ let activeTab = 'all'
     function updateDocGrid() {
       const grid = document.querySelector('.docs-grid')
       const emptyState = document.querySelector('.empty-state')
-      
-      if (activeDocs.length === 0) {
-        grid.innerHTML = ''
-        if (emptyState) {
-          emptyState.style.display = 'block'
-          const p = emptyState.querySelector('p')
-          if (p) {
-            switch (activeTab) {
-              case 'read':
-                p.textContent = '暂无精读文章'
-                break
-              case 'collect':
-                p.textContent = '暂无收藏文章'
-                break
-              case 'today':
-                p.textContent = '今天还没有添加新文章'
-                break
-              default:
-                p.textContent = '暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。'
-            }
-          }
-        }
-        return
-      }
-      
+
       if (emptyState) {
         emptyState.style.display = 'none'
       }
-      
+
       const allCards = document.querySelectorAll('.doc-card')
+      let visibleCount = 0
 
       allCards.forEach(card => {
         // 从 data-tags 属性中获取 tags 数据
@@ -205,10 +182,32 @@ let activeTab = 'all'
 
         if (shouldShow) {
           card.style.display = 'block'
+          visibleCount++
         } else {
           card.style.display = 'none'
         }
       })
+
+      // 过滤完成后处理空状态
+      if (visibleCount === 0 && emptyState) {
+        emptyState.style.display = 'block'
+        const p = emptyState.querySelector('p')
+        if (p) {
+          switch (activeTab) {
+            case 'read':
+              p.textContent = '暂无精读文章'
+              break
+            case 'collect':
+              p.textContent = '暂无收藏文章'
+              break
+            case 'today':
+              p.textContent = '今天还没有添加新文章'
+              break
+            default:
+              p.textContent = '暂无文档'
+          }
+        }
+      }
     }
   </script>
 
