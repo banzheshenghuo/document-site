@@ -2,7 +2,7 @@
 title: '真实项目对比openSpec/superpower/feature-dev/gsd/gstack'
 description: '在4000+文件的C++复杂项目中,对比五种AI辅助开发工作流的实际表现,包括Token消耗、时间消耗、交互次数、代码质量等维度。'
 date: '2026-03-31 13:10:00'
-tags: ['AI开发', '工作流对比', 'superpower', 'gsd', 'openspec', 'feature-dev', 'Claude Code']
+tags: ['精读', 'AI开发', '工作流对比', 'superpower', 'gsd', 'openspec', 'feature-dev', 'Claude Code']
 category: '技术解读'
 ---
 

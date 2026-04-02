@@ -2,7 +2,7 @@
 title: '从 Vibe Coding 到 Spec Coding 再到 Harness Engineer：AI 编程的三次范式跃迁'
 description: '2024年Vibe Coding让人人都能用嘴写代码；2025年Spec Coding让AI编出的代码真正可用；2026年Harness Engineer让人类从写代码的人变成驾驭Agent的人'
 date: '2026-03-28'
-tags: ['AI编程', 'Vibe Coding', 'Spec Coding', 'Harness Engineer', '范式跃迁']
+tags: ['精读', 'AI编程', 'Vibe Coding', 'Spec Coding', 'Harness Engineer', '范式跃迁']
 category: '技术解读'
 ---
 

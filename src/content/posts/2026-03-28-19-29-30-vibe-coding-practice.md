@@ -2,7 +2,7 @@
 title: '我是怎么 vibe coding 的'
 description: '从个人使用 Claude/Codex 的经验出发，探讨 vibe coding 的局限性和文档/工具/团队协作的重要性'
 date: '2026-03-28 19:29:30'
-tags: ['AI编程', 'Vibe Coding', 'Agent开发', '文档工程', '团队协作']
+tags: ['精读', 'AI编程', 'Vibe Coding', 'Agent开发', '文档工程', '团队协作']
 category: '技术解读'
 ---
 
