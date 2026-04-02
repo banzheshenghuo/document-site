@@ -22,7 +22,7 @@ const { Content, headings } = await doc.render()
 const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
 ---
 
-<script define:vars={{ basePath }}>
+<script>
   // 回到顶部按钮逻辑
   const backToTop = document.getElementById('backToTop');
   
@@ -39,6 +39,11 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     
     // 初始检查
     handleScroll();
+
+    // 点击回到顶部
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 </script>
 
@@ -73,15 +78,13 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
       </div>
 
       <!-- 回到顶部按钮 -->
-      {typeof document !== 'undefined' && (
-        <button
-          class="back-to-top"
-          id="backToTop"
-          onclick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        >
-          ↑
-        </button>
-      )}
+      <button
+        class="back-to-top"
+        id="backToTop"
+        aria-label="回到顶部"
+      >
+        ↑
+      </button>
 
       <footer class="doc-footer">
         <a href={basePath} class="back-link">← 返回首页</a>
@@ -253,6 +256,9 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     visibility: hidden;
     transition: all 0.3s;
     z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .back-to-top.visible {
