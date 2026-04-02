@@ -5,6 +5,7 @@ export interface Props {
   description?: string
   date?: string
   tags?: string[]
+  'data-tags'?: string
 }
 
 const {
@@ -12,7 +13,8 @@ const {
   title,
   description,
   date,
-  tags = []
+  tags = [],
+  'data-tags': dataTags
 } = Astro.props
 
 const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
@@ -34,7 +36,7 @@ function getPrefixType(prefix: string | null): 'read' | 'collect' | null {
 const { prefix, titleWithoutPrefix } = getPrefix(title)
 const prefixType = getPrefixType(prefix)
 ---
-<article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`}>
+<article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)}>
   <a href={`${basePath}/posts/${slug}`} class="doc-card-link">
     <div class="doc-card-content">
       <h2 class="doc-card-title">{title}</h2>

@@ -100,6 +100,7 @@ let activeTab = 'all'
             description={doc.data.description}
             date={doc.data.date}
             tags={doc.data.tags}
+            data-tags={JSON.stringify(doc.data.tags || [])}
           />
         ))}
       </div>
@@ -189,17 +190,19 @@ let activeTab = 'all'
       }
       
       const allCards = document.querySelectorAll('.doc-card')
-      
+
       allCards.forEach(card => {
-        const title = card.querySelector('.doc-card-title')?.textContent || ''
-        
+        // 从 data-tags 属性中获取 tags 数据
+        const tagsData = card.getAttribute('data-tags')
+        const tags = tagsData ? JSON.parse(tagsData) : []
+
         let shouldShow = false
         switch (activeTab) {
           case 'read':
-            shouldShow = title.includes('[精读]') || title.includes('[解读]')
+            shouldShow = tags.includes('精读') || tags.includes('解读')
             break
           case 'collect':
-            shouldShow = title.includes('[收藏]') || title.includes('[归档]') || title.includes('[书签]')
+            shouldShow = tags.includes('收藏') || tags.includes('归档') || tags.includes('书签')
             break
           case 'today':
             const cardTime = card.querySelector('.doc-card-date')?.textContent || ''
@@ -214,7 +217,7 @@ let activeTab = 'all'
           default:
             shouldShow = true
         }
-        
+
         if (shouldShow) {
           card.style.display = 'block'
         } else {
