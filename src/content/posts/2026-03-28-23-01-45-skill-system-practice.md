@@ -2,7 +2,7 @@
 title: '花一天时间把工作 Skill 化，才是享受 AI 复利的开始'
 description: '作者分享了145个AI Skill的分类、制作方法、迭代策略和使用技巧，包括写作类、信息处理类、产品工作类、自动化与工具类、设计与可视化类、规划与复盘类，以及如何从交付物、工作步骤、聊天记录、隐性知识四个方法制作Skill，并通过日志记录和分析工具实现Skill迭代'
 date: '2026-03-28 23:01:45'
-tags: ['AI Skill', 'Skill工程', '自动化', 'AI生产力', 'Obsidian']
+tags: ['精读', 'AI Skill', 'Skill工程', '自动化', 'AI生产力', 'Obsidian']
 category: '技术解读'
 ---
 
