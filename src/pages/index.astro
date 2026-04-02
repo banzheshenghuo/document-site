@@ -16,13 +16,13 @@ const sortedDocs = allDocs.sort((a, b) => {
 
 // 分类文档
 const readDocs = sortedDocs.filter(doc => {
-  const title = doc.data.title || ''
-  return title.includes('[精读]') || title.includes('[解读]')
+  const tags = doc.data.tags || []
+  return tags.includes('精读') || tags.includes('解读')
 })
 
 const collectDocs = sortedDocs.filter(doc => {
-  const title = doc.data.title || ''
-  return title.includes('[收藏]') || title.includes('[归档]') || title.includes('[书签]')
+  const tags = doc.data.tags || []
+  return tags.includes('收藏') || tags.includes('归档') || tags.includes('书签')
 })
 
 // 今天的文档（24小时内）
