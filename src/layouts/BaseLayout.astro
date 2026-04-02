@@ -184,11 +184,78 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
   img {
     max-width: 100%;
     height: auto;
+    display: block;  /* 防止图片行内导致的布局问题 */
+    margin: 1.5rem auto;  /* 图片居中 */
+    border-radius: 0.5rem;
   }
 
+  /* 修复代码块溢出问题 */
   code {
     font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
     font-size: 0.9em;
+  }
+
+  pre {
+    overflow-x: auto;  /* 水平滚动 */
+    max-width: 100%;   /* 防止溢出 */
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  pre code {
+    display: block;   /* 代码块独占一行 */
+    overflow-x: auto;
+    padding: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  /* 修复表格溢出问题 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    display: block;  /* 允许表格滚动 */
+    max-width: 100%;
+  }
+
+  thead {
+    display: table;
+    width: 100%;
+  }
+
+  tbody {
+    display: table;
+    width: 100%;
+  }
+
+  /* 修复列表嵌套问题 */
+  ul, ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  ul ul, ol ol, ul ol, ol ul {
+    margin: 0.5rem 0;
+  }
+
+  /* 修复引用块溢出问题 */
+  blockquote {
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    border-left: 4px solid var(--color-primary);
+    background: var(--color-bg-secondary);
+    border-radius: 0 0.5rem 0.5rem 0;
+    overflow-x: auto;  /* 防止内容溢出 */
+    max-width: 100%;
+  }
+
+  /* 修复 HTML 标签嵌套问题 */
+  .doc-content > div {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   .layout {
@@ -205,12 +272,28 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     padding: 2rem 1rem;
   }
 
-  /* Mermaid 图表样式 */
+  /* Mermaid 图表样式 - 修复溢出问题 */
   .mermaid {
     background: var(--color-bg-secondary);
     border-radius: 0.5rem;
     padding: 1rem;
     margin: 1.5rem 0;
     text-align: center;
+    overflow-x: auto;  /* 防止水平溢出 */
+    max-width: 100%;   /* 限制最大宽度 */
+    box-shadow: var(--shadow);
+  }
+
+  .mermaid svg {
+    max-width: 100%;  /* SVG 响应式 */
+    height: auto !important;  /* 保持比例 */
+  }
+
+  /* 修复 Mermaid 在移动端的问题 */
+  @media (max-width: 768px) {
+    .mermaid {
+      padding: 0.5rem;
+      font-size: 0.875rem;
+    }
   }
 </style>

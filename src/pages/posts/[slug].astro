@@ -22,6 +22,28 @@ const { Content, headings } = await doc.render()
 const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
 ---
 
+<script define:vars={{ basePath }}>
+  // 回到顶部按钮逻辑
+  const backToTop = document.getElementById('backToTop');
+  
+  if (backToTop) {
+    const handleScroll = () => {
+      if (window.scrollY > 500) {
+        backToTop.classList.add('visible');
+      } else {
+        backToTop.classList.remove('visible');
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    // 初始检查
+    handleScroll();
+  }
+</script>
+
+---
+
 <DocLayout title={doc.data.title} description={doc.data.description}>
   <article class="doc-layout doc-page">
     <div class="doc-main">
@@ -49,6 +71,17 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
       <div class="doc-content prose">
         <Content />
       </div>
+
+      <!-- 回到顶部按钮 -->
+      {typeof document !== 'undefined' && (
+        <button
+          class="back-to-top"
+          id="backToTop"
+          onclick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          ↑
+        </button>
+      )}
 
       <footer class="doc-footer">
         <a href={basePath} class="back-link">← 返回首页</a>
@@ -132,9 +165,126 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     color: var(--color-primary);
   }
 
+  /* 优化文章内容样式 */
+  .doc-content {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .doc-content > * {
+    max-width: 100%;
+    overflow-wrap: break-word;  /* 防止长单词溢出 */
+  }
+
+  .doc-content h2 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-border);
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  .doc-content h3 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+
+  .doc-content p {
+    margin-bottom: 1.25rem;
+    line-height: 1.75;
+  }
+
+  .doc-content ul,
+  .doc-content ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.75rem;
+  }
+
+  .doc-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  .doc-content a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  .doc-content a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .doc-content pre {
+    background: var(--color-code-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    max-width: 100%;
+    margin: 1.5rem 0;
+  }
+
+  .doc-content pre code {
+    display: block;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  /* 回到顶部按钮 */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3rem;
+    height: 3rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    z-index: 1000;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .back-to-top:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 25px -5px rgb(0 0 0 / 0.15);
+  }
+
   @media (max-width: 768px) {
     .doc-header h1 {
       font-size: 1.75rem;
+    }
+
+    .doc-content h2 {
+      font-size: 1.5rem;
+    }
+
+    .doc-content h3 {
+      font-size: 1.25rem;
+    }
+
+    .back-to-top {
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1.25rem;
     }
   }
 </style>
