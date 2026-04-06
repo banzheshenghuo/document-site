@@ -14,15 +14,28 @@ const { title, description } = Astro.props
 </BaseLayout>
 
 <style>
-  :global(.doc-layout) {
+  /* 桌面端：右侧目录 */
+  :global(.doc-page) {
     display: grid;
-    grid-template-columns: 1fr 280px;
+    grid-template-columns: 1fr 220px;
     gap: 2rem;
+    align-items: start;
   }
 
+  /* 移动端：目录在上方，单列 */
   @media (max-width: 768px) {
-    :global(.doc-layout) {
+    :global(.doc-page) {
       grid-template-columns: 1fr;
+    }
+
+    /* 移动端目录排在内容前面 */
+    :global(.doc-page) {
+      display: flex;
+      flex-direction: column;
+    }
+
+    :global(.doc-page .toc) {
+      order: -1;
     }
   }
 </style>
