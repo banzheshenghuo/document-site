@@ -33,21 +33,40 @@ function getPrefixType(prefix: string | null): 'read' | 'collect' | null {
   return null
 }
 
+// 格式化日期
+function formatDate(dateStr: string): string {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  const month = d.getMonth() + 1
+  const day = d.getDate()
+  return `${month}月${day}日`
+}
+
 const { prefix, titleWithoutPrefix } = getPrefix(title)
 const prefixType = getPrefixType(prefix)
+const displayTitle = titleWithoutPrefix || title
 ---
 <article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)} data-date={date || ''}>
+  {prefix && (
+    <div class={`doc-card-bar doc-card-bar--${prefixType || 'default'}`}>
+      <span class="doc-card-bar-label">{prefix}</span>
+    </div>
+  )}
+  {!prefix && (
+    <div class="doc-card-bar doc-card-bar--default"></div>
+  )}
   <a href={`${basePath}/posts/${slug}`} class="doc-card-link">
     <div class="doc-card-content">
-      <h2 class="doc-card-title">{title}</h2>
+      <h2 class="doc-card-title">{displayTitle}</h2>
       {description && (
         <p class="doc-card-description">{description}</p>
       )}
       <div class="doc-card-meta">
-        {date && <time class="doc-card-date">{date}</time>}
+        {date && <time class="doc-card-date">{formatDate(date)}</time>}
         {tags.length > 0 && (
           <div class="doc-card-tags">
-            {tags.map(tag => (
+            {tags.filter(t => !['精读','解读','深度','收藏','归档','书签'].includes(t)).slice(0, 3).map(tag => (
               <span class="doc-card-tag">{tag}</span>
             ))}
           </div>
@@ -61,15 +80,54 @@ const prefixType = getPrefixType(prefix)
   .doc-card {
     background: var(--color-bg);
     border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
+    border-radius: 0.875rem;
     overflow: hidden;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .doc-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(59, 130, 246, 0.06), transparent 40%);
   }
 
   .doc-card:hover {
-    border-color: var(--color-primary);
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(59, 130, 246, 0.1);
+    transform: translateY(-4px);
+  }
+
+  .doc-card:hover::after {
+    opacity: 1;
+  }
+
+  /* 顶部色条 */
+  .doc-card-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-border), var(--color-border));
+    transition: height 0.3s ease;
+  }
+
+  .doc-card:hover .doc-card-bar {
+    height: 4px;
+  }
+
+  .doc-card-bar--read {
+    background: linear-gradient(90deg, #3b82f6, #6366f1);
+  }
+
+  .doc-card-bar--collect {
+    background: linear-gradient(90deg, #f59e0b, #ef4444);
+  }
+
+  .doc-card-bar--default {
+    background: linear-gradient(90deg, #94a3b8, #cbd5e1);
   }
 
   .doc-card-link {
@@ -78,66 +136,84 @@ const prefixType = getPrefixType(prefix)
   }
 
   .doc-card-content {
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem 1.5rem;
   }
 
   .doc-card-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--color-text);
-    line-height: 1.4;
-    padding: 0.5rem 0.5rem;
-    border-radius: 0.5rem;
-    border-left: 4px solid transparent;
+    line-height: 1.5;
+    transition: color 0.2s;
   }
 
-  /* 精读文章：蓝色左边框 */
-  .doc-card--read .doc-card-title {
-    border-left-color: #3b82f6;
-    background: linear-gradient(90deg, #3b82f6 0%, #e0e7ff 10%);
+  .doc-card:hover .doc-card-title {
+    color: var(--color-primary);
   }
 
-  /* 收藏文章：橙色左边框 */
-  .doc-card--collect .doc-card-title {
-    border-left-color: #f59e0b;
-    background: linear-gradient(90deg, #f59e0b 0%, #ffbf00 10%);
+  .doc-card--read:hover .doc-card-title {
+    color: #3b82f6;
+  }
+
+  .doc-card--collect:hover .doc-card-title {
+    color: #f59e0b;
   }
 
   .doc-card-description {
     color: var(--color-text-secondary);
-    line-height: 1.6;
+    font-size: 0.875rem;
+    line-height: 1.7;
     margin-bottom: 1rem;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    opacity: 0.8;
   }
 
   .doc-card-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.5rem;
     align-items: center;
   }
 
   .doc-card-date {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: var(--color-text-secondary);
+    opacity: 0.7;
   }
 
   .doc-card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.375rem;
+    margin-left: auto;
   }
 
   .doc-card-tag {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.625rem;
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.5rem;
     background: var(--color-bg-secondary);
     border-radius: 9999px;
     color: var(--color-text-secondary);
     border: 1px solid var(--color-border);
+    transition: all 0.2s;
+  }
+
+  .doc-card:hover .doc-card-tag {
+    border-color: rgba(59, 130, 246, 0.2);
   }
 </style>
+
+<script>
+  // 卡片鼠标跟踪光效
+  document.querySelectorAll('.doc-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect()
+      card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`)
+      card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`)
+    })
+  })
+</script>
