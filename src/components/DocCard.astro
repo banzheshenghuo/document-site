@@ -36,7 +36,7 @@ function getPrefixType(prefix: string | null): 'read' | 'collect' | null {
 const { prefix, titleWithoutPrefix } = getPrefix(title)
 const prefixType = getPrefixType(prefix)
 ---
-<article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)}>
+<article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)} data-date={date || ''}>
   <a href={`${basePath}/posts/${slug}`} class="doc-card-link">
     <div class="doc-card-content">
       <h2 class="doc-card-title">{title}</h2>

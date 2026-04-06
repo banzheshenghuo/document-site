@@ -87,7 +87,7 @@ let activeTab = 'all'
             id="tab-today"
             onclick="switchTab('today')"
           >
-            📅 今天 <span class="tab-count">({todayDocs.length})</span>
+            📅 今天 <span class="tab-count" id="today-count">(0)</span>
           </button>
         </div>
       </h2>
@@ -123,6 +123,25 @@ let activeTab = 'all'
 
     // 默认活动标签
     let activeTab = 'all'
+
+    // 动态计算"今天"的文章数量
+    function updateTodayCount() {
+      const allCards = document.querySelectorAll('.doc-card')
+      let count = 0
+      allCards.forEach(card => {
+        const cardTime = card.getAttribute('data-date') || ''
+        if (cardTime) {
+          const cardDate = new Date(cardTime)
+          const cardDay = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate())
+          if (cardDay.getTime() === today.getTime()) count++
+        }
+      })
+      const el = document.getElementById('today-count')
+      if (el) el.textContent = `(${count})`
+    }
+
+    // 页面加载时立即计算
+    updateTodayCount()
 
     function switchTab(tab) {
       activeTab = tab
@@ -167,13 +186,13 @@ let activeTab = 'all'
             shouldShow = tags.includes('收藏') || tags.includes('归档') || tags.includes('书签')
             break
           case 'today':
-            const cardTime = card.querySelector('.doc-card-date')?.textContent || ''
+            const cardTime = card.getAttribute('data-date') || ''
             if (!cardTime) {
               shouldShow = false
             } else {
               const cardDate = new Date(cardTime)
-              const cardToday = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate())
-              shouldShow = cardToday.getTime() === today.getTime()
+              const cardDay = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate())
+              shouldShow = cardDay.getTime() === today.getTime()
             }
             break
           default:
