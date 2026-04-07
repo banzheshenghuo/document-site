@@ -132,16 +132,20 @@ let activeTab = 'all'
           {activeTab === 'all' && <p>暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。</p>}
         </div>
       )}
+
+      <div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
+        <button class="load-more-btn" id="loadMoreBtn">加载更多</button>
+      </div>
     </section>
   </div>
 
   <script is:inline>
-    // 获取今天的日期
+    const PAGE_SIZE = 18
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
-    // 默认活动标签
     let activeTab = 'all'
+    let visibleCount = PAGE_SIZE
 
     // 动态计算"今天"的文章数量
     function updateTodayCount() {
@@ -158,13 +162,31 @@ let activeTab = 'all'
       const el = document.getElementById('today-count')
       if (el) el.textContent = `(${count})`
     }
-
-    // 页面加载时立即计算
     updateTodayCount()
+
+    // 判断卡片是否匹配当前 tab
+    function cardMatchesTab(card, tab) {
+      const tagsData = card.getAttribute('data-tags')
+      const tags = tagsData ? JSON.parse(tagsData) : []
+      switch (tab) {
+        case 'read':
+          return tags.includes('精读') || tags.includes('解读')
+        case 'collect':
+          return tags.includes('收藏') || tags.includes('归档') || tags.includes('书签')
+        case 'today':
+          const cardTime = card.getAttribute('data-date') || ''
+          if (!cardTime) return false
+          const cardDate = new Date(cardTime)
+          const cardDay = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate())
+          return cardDay.getTime() === today.getTime()
+        default:
+          return true
+      }
+    }
 
     function switchTab(tab) {
       activeTab = tab
-
+      visibleCount = PAGE_SIZE
       updateTabButtons()
       updateDocGrid()
     }
@@ -172,95 +194,86 @@ let activeTab = 'all'
     function updateTabButtons() {
       document.querySelectorAll('.tab-button').forEach(btn => {
         const tab = btn.id.replace('tab-', '')
-        if (tab === activeTab) {
-          btn.classList.add('active')
-        } else {
-          btn.classList.remove('active')
-        }
+        btn.classList.toggle('active', tab === activeTab)
       })
     }
 
     function updateDocGrid() {
-      const grid = document.querySelector('.docs-grid')
       const emptyState = document.querySelector('.empty-state')
-
-      if (emptyState) {
-        emptyState.style.display = 'none'
-      }
+      const loadMoreWrap = document.getElementById('loadMoreWrap')
+      if (emptyState) emptyState.style.display = 'none'
 
       const allCards = document.querySelectorAll('.doc-card')
-      let visibleCount = 0
+      let matchIndex = 0
 
       allCards.forEach(card => {
-        // 从 data-tags 属性中获取 tags 数据
-        const tagsData = card.getAttribute('data-tags')
-        const tags = tagsData ? JSON.parse(tagsData) : []
-
-        let shouldShow = false
-        switch (activeTab) {
-          case 'read':
-            shouldShow = tags.includes('精读') || tags.includes('解读')
-            break
-          case 'collect':
-            shouldShow = tags.includes('收藏') || tags.includes('归档') || tags.includes('书签')
-            break
-          case 'today':
-            const cardTime = card.getAttribute('data-date') || ''
-            if (!cardTime) {
-              shouldShow = false
-            } else {
-              const cardDate = new Date(cardTime)
-              const cardDay = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate())
-              shouldShow = cardDay.getTime() === today.getTime()
-            }
-            break
-          default:
-            shouldShow = true
-        }
-
-        if (shouldShow) {
-          card.style.display = 'block'
-          visibleCount++
+        if (cardMatchesTab(card, activeTab)) {
+          if (matchIndex < visibleCount) {
+            card.style.display = ''
+            observeCard(card)
+          } else {
+            card.style.display = 'none'
+          }
+          matchIndex++
         } else {
           card.style.display = 'none'
         }
       })
 
-      // 过滤完成后处理空状态
-      if (visibleCount === 0 && emptyState) {
+      // 空状态
+      if (matchIndex === 0 && emptyState) {
         emptyState.style.display = 'block'
         const p = emptyState.querySelector('p')
         if (p) {
-          switch (activeTab) {
-            case 'read':
-              p.textContent = '暂无精读文章'
-              break
-            case 'collect':
-              p.textContent = '暂无收藏文章'
-              break
-            case 'today':
-              p.textContent = '今天还没有添加新文章'
-              break
-            default:
-              p.textContent = '暂无文档'
-          }
+          const msgs = { read: '暂无精读文章', collect: '暂无收藏文章', today: '今天还没有添加新文章' }
+          p.textContent = msgs[activeTab] || '暂无文档'
         }
+      }
+
+      // 加载更多按钮
+      if (loadMoreWrap) {
+        const hasMore = matchIndex > visibleCount
+        loadMoreWrap.style.display = hasMore ? '' : 'none'
       }
     }
 
-    // 卡片滚动渐入动画
-    const observer = new IntersectionObserver((entries) => {
+    function loadMore() {
+      visibleCount += PAGE_SIZE
+      updateDocGrid()
+    }
+
+    // 加载更多按钮事件
+    document.getElementById('loadMoreBtn')?.addEventListener('click', loadMore)
+
+    // 滚动自动加载
+    const scrollSentinel = document.getElementById('loadMoreWrap')
+    if (scrollSentinel) {
+      const scrollObserver = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && scrollSentinel.style.display !== 'none') {
+          loadMore()
+        }
+      }, { rootMargin: '200px' })
+      scrollObserver.observe(scrollSentinel)
+    }
+
+    // 卡片渐入动画
+    const cardObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('card-visible')
-          observer.unobserve(entry.target)
+          cardObserver.unobserve(entry.target)
         }
       })
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' })
 
-    document.querySelectorAll('.doc-card').forEach(card => {
-      observer.observe(card)
-    })
+    function observeCard(card) {
+      if (!card.classList.contains('card-visible')) {
+        cardObserver.observe(card)
+      }
+    }
+
+    // 初始渲染
+    updateDocGrid()
   </script>
 
   <script define:vars={{ searchIndex, activeDocs: sortedDocs }}>
@@ -481,6 +494,30 @@ let activeTab = 'all'
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
     font-size: 0.9em;
+  }
+
+  /* ===== 加载更多 ===== */
+  .load-more-wrap {
+    text-align: center;
+    padding: 2rem 0 1rem;
+  }
+
+  .load-more-btn {
+    padding: 0.625rem 2rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    border-radius: 9999px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.25s;
+  }
+
+  .load-more-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(59, 130, 246, 0.05);
   }
 
   @media (max-width: 640px) {
