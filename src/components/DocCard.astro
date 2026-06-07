@@ -94,12 +94,12 @@ const displayTitle = titleWithoutPrefix || title
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
-    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(59, 130, 246, 0.06), transparent 40%);
+    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(37, 99, 235, 0.06), transparent 40%);
   }
 
   .doc-card:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(59, 130, 246, 0.1);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(37, 99, 235, 0.08);
     transform: translateY(-4px);
   }
 
@@ -119,7 +119,7 @@ const displayTitle = titleWithoutPrefix || title
   }
 
   .doc-card-bar--read {
-    background: linear-gradient(90deg, #3b82f6, #6366f1);
+    background: linear-gradient(90deg, #2563EB, #3B82F6);
   }
 
   .doc-card-bar--collect {
@@ -153,7 +153,7 @@ const displayTitle = titleWithoutPrefix || title
   }
 
   .doc-card--read:hover .doc-card-title {
-    color: #3b82f6;
+    color: #2563EB;
   }
 
   .doc-card--collect:hover .doc-card-title {
@@ -203,7 +203,7 @@ const displayTitle = titleWithoutPrefix || title
   }
 
   .doc-card:hover .doc-card-tag {
-    border-color: rgba(59, 130, 246, 0.2);
+    border-color: rgba(37, 99, 235, 0.2);
   }
 </style>
 
