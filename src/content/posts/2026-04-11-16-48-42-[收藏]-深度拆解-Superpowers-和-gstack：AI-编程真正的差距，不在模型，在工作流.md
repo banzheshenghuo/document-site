@@ -4,6 +4,7 @@ description: '深度解析 Superpowers 和 gstack 两个 AI 编程工具的核�
 date: "2026-04-11 16:48:42"
 tags: ['收藏', 'auto:tech', 'AI', '编程', 'Superpowers', 'gstack', 'Claude Code', '工作流', 'Agent']
 category: AI与Agent
+type: collect
 ---
 
 > **来源**：知乎

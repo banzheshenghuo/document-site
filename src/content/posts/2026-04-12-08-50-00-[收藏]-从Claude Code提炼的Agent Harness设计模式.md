@@ -4,6 +4,7 @@ description: '从 Claude Code 源码系统性分析中提取的 6 大 Agent Harn
 date: "2026-04-12 08:50:00"
 tags: ['收藏', 'auto:tech', 'AI Agent', 'Claude Code', '设计模式', '上下文工程']
 category: AI与Agent
+type: collect
 ---
 
 ## 📋 文章信息

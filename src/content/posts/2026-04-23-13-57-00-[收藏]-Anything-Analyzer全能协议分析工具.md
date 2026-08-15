@@ -4,6 +4,7 @@ description: 'AI 加持的全能协议分析工具，集成浏览器抓包、MIT
 date: "2026-04-23 13:57:00"
 tags: ['收藏', 'auto:tech', 'Anything-Analyzer', '抓包工具', 'MITM代理', 'AI分析', 'MCP-Server', '逆向工程', '安全审计']
 category: 开源库与工具
+type: collect
 ---
 
 ## 📋 文章信息

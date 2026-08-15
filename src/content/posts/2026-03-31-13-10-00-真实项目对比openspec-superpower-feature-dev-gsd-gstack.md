@@ -4,6 +4,7 @@ description: '在4000+文件的C++复杂项目中,对比五种AI辅助开发工�
 date: '2026-03-31 13:10:00'
 tags: ['精读', 'AI开发', '工作流对比', 'superpower', 'gsd', 'openspec', 'feature-dev', 'Claude Code']
 category: AI与Agent
+type: read
 ---
 
 > 来源：知乎专栏 | 原文链接：[真实项目对比openSpec/superpower/feature-dev/gsd/gstack](https://zhuanlan.zhihu.com/p/2020438154780362341) | 作者：stevenaw | 日期：2026年3月31日

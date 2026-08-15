@@ -6,6 +6,7 @@ export interface Props {
   date?: string
   tags?: string[]
   category?: string
+  type?: 'read' | 'collect'
   'data-tags'?: string
 }
 
@@ -16,6 +17,7 @@ const {
   date,
   tags = [],
   category,
+  type,
   'data-tags': dataTags
 } = Astro.props
 
@@ -46,16 +48,18 @@ function formatDate(dateStr: string): string {
 }
 
 const { prefix, titleWithoutPrefix } = getPrefix(title)
-const prefixType = getPrefixType(prefix)
+// 显式 type 字段优先，标题前缀解析仅作历史文章兜底
+const articleType = type || getPrefixType(prefix)
+const typeLabel = prefix || (articleType === 'read' ? '精读' : articleType === 'collect' ? '收藏' : null)
 const displayTitle = titleWithoutPrefix || title
 ---
-<article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)} data-date={date || ''} data-category={category || ''}>
-  {prefix && (
-    <div class={`doc-card-bar doc-card-bar--${prefixType || 'default'}`}>
-      <span class="doc-card-bar-label">{prefix}</span>
+<article class={`doc-card ${articleType ? `doc-card--${articleType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)} data-date={date || ''} data-category={category || ''} data-type={articleType || ''}>
+  {typeLabel && (
+    <div class={`doc-card-bar doc-card-bar--${articleType || 'default'}`}>
+      <span class="doc-card-bar-label">{typeLabel}</span>
     </div>
   )}
-  {!prefix && (
+  {!typeLabel && (
     <div class="doc-card-bar doc-card-bar--default"></div>
   )}
   <a href={`${basePath}/posts/${slug}`} class="doc-card-link">

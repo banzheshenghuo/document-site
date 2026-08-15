@@ -2,6 +2,7 @@
 title: '本地小模型的Claude Code来了，拆解它的完整Harness'
 date: 2026-07-08T17:04:25+08:00
 category: AI与Agent
+type: read
 tags: ['精读', 'auto:tech', 'Agent', 'Harness', 'Zleap-Agent', 'Workspace', '本地小模型', 'Context管理', 'Memory设计']
 description: 拆解Zleap-Agent的Workspace-first Harness设计，探讨本地小模型的Agent架构方法论
 ---

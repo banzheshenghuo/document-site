@@ -2,6 +2,7 @@
 title: 'BrowserAct Skills：AI Agent 的浏览器自动化技能库'
 date: 2026-07-13T13:51:00+08:00
 category: 开源库与工具
+type: read
 tags: ['精读', 'AI', 'Agent', '浏览器自动化', 'BrowserAct', 'LLM']
 description: BrowserAct 围绕 Agent 真实工作方式重新设计了浏览器操作接口，实现索引化交互、三层反封锁和 Skill 自动生成。
 ---

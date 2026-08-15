@@ -4,6 +4,7 @@ description: '作者分享了145个AI Skill的分类、制作方法、迭代策�
 date: '2026-03-28 23:01:45'
 tags: ['精读', 'AI Skill', 'Skill工程', '自动化', 'AI生产力', 'Obsidian']
 category: AI与Agent
+type: read
 ---
 
 > 来源：知乎 | 原文链接：[花一天时间把工作 Skill 化，才是享受 AI 复利的开始](https://zhuanlan.zhihu.com/p/2020651711962853405) | 日期：2026年3月27日

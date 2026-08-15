@@ -4,6 +4,7 @@ description: '对比 Graphify（多模态知识图谱构建器）和 GitNexus（
 date: "2026-04-20 18:28:00"
 tags: ['收藏', 'auto:tech', '知识图谱', 'AI编程', '代码理解', 'Graphify', 'GitNexus']
 category: 开源库与工具
+type: collect
 ---
 
 ## 📋 文章信息

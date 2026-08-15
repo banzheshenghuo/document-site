@@ -2,6 +2,7 @@
 title: 'Claude Advisor Tool 顾问工具'
 date: 2026-04-11T21:55:00+08:00
 category: 开源库与工具
+type: read
 tags: ['精读', 'AI', 'Claude', 'Tool Use', 'Agent', 'LLM']
 description: 'Anthropic 推出的 Advisor Tool 让低成本执行模型在生成过程中随时咨询高智能顾问模型，兼顾质量与成本。'
 ---

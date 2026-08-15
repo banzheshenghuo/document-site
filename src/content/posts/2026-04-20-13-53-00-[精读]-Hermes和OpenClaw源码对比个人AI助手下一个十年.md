@@ -2,6 +2,7 @@
 title: '扒开 Hermes 和 OpenClaw 的源码，我发现了个人 AI 助手的下一个十年'
 date: 2026-04-20T13:53:00+08:00
 category: AI与Agent
+type: read
 tags: ['精读', 'auto:tech', 'OpenClaw', 'Hermes-Agent', '个人AI助手', 'Agent架构', '记忆系统', 'Gateway架构']
 description: '从源码层面深度对比 OpenClaw 与 Hermes Agent 的架构哲学与设计分叉'
 ---

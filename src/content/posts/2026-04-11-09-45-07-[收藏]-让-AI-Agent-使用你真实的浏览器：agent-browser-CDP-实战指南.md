@@ -4,6 +4,7 @@ description: '介绍如何使用 agent-browser 和 Chrome DevTools Protocol (CDP
 date: "2026-04-11 09:45:07"
 tags: ['收藏', 'auto:tech', 'AI', '浏览器', 'Chrome', 'CDP', '自动化']
 category: 开源库与工具
+type: collect
 ---
 
 > **来源**：知乎

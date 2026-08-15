@@ -2,6 +2,7 @@
 title: 'TS 大神 Matt Pocock 开源自己的 AI Skills，主打反 Vibe Coding'
 date: 2026-04-29T17:36:55+08:00
 category: AI与Agent
+type: read
 tags: ['精读', 'AI', 'Agent', 'Claude-Code', 'TDD', 'Vibe-Coding', '工程实践']
 description: 'Matt Pocock 开源 AI Skills 仓库，用工程纪律对抗 Vibe Coding，提供可组合的 AI 编程协作方法。'
 ---

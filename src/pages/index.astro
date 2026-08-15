@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import SearchBox from '../components/SearchBox.astro'
 import DocCard from '../components/DocCard.astro'
 import { getCollection } from 'astro:content'
+import { CATEGORIES } from '../site'
 
 // 获取所有文档
 const allDocs = await getCollection('posts')
@@ -14,25 +15,17 @@ const sortedDocs = allDocs.sort((a, b) => {
   return dateB - dateA
 })
 
-// 分类文档
-const readDocs = sortedDocs.filter(doc => {
-  const tags = doc.data.tags || []
-  return tags.includes('精读') || tags.includes('解读')
-})
+// 分类文档（基于显式 type 字段）
+const readDocs = sortedDocs.filter(doc => doc.data.type === 'read')
+const collectDocs = sortedDocs.filter(doc => doc.data.type === 'collect')
 
-const collectDocs = sortedDocs.filter(doc => {
-  const tags = doc.data.tags || []
-  return tags.includes('收藏') || tags.includes('归档') || tags.includes('书签')
-})
-
-// 分类定义与计数（固定展示顺序）
-const CATEGORY_ORDER = ['AI与Agent', '技术', '开源库与工具', '金融', '认知迭代', '知识管理', '职业发展', '心理学', '生活', '其他']
+// 分类定义与计数（顺序来源于 site.ts 的唯一枚举）
 const categoryCounts = new Map<string, number>()
 sortedDocs.forEach(doc => {
   const c = doc.data.category || '其他'
   categoryCounts.set(c, (categoryCounts.get(c) || 0) + 1)
 })
-const categories = CATEGORY_ORDER.map(c => ({ name: c, count: categoryCounts.get(c) || 0 }))
+const categories = CATEGORIES.map(c => ({ name: c, count: categoryCounts.get(c) || 0 }))
 
 // 收集所有标签
 const allTags = new Set<string>()
@@ -145,6 +138,7 @@ let activeTab = 'all'
             date={doc.data.date}
             tags={doc.data.tags}
             category={doc.data.category || '其他'}
+            type={doc.data.type}
             data-tags={JSON.stringify(doc.data.tags || [])}
           />
         ))}
@@ -193,13 +187,12 @@ let activeTab = 'all'
 
     // 判断卡片是否匹配当前 tab
     function cardMatchesTab(card, tab) {
-      const tagsData = card.getAttribute('data-tags')
-      const tags = tagsData ? JSON.parse(tagsData) : []
+      const type = card.getAttribute('data-type')
       switch (tab) {
         case 'read':
-          return tags.includes('精读') || tags.includes('解读')
+          return type === 'read'
         case 'collect':
-          return tags.includes('收藏') || tags.includes('归档') || tags.includes('书签')
+          return type === 'collect'
         case 'today':
           const cardTime = card.getAttribute('data-date') || ''
           if (!cardTime) return false

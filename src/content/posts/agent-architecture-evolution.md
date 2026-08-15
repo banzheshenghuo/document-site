@@ -4,6 +4,7 @@ description: '深入分析Agent架构的演进路径，从Single Agent到Multi-A
 date: '2026-03-17'
 tags: ['精读', 'Agent', '架构设计', '技术选型', 'Multi-Agent', 'LLM']
 category: AI与Agent
+type: read
 ---
 
 # Agent/Skills/Teams 架构演进过程及技术选型之道

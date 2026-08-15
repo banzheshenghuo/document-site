@@ -4,6 +4,7 @@ description: '2024年Vibe Coding让人人都能用嘴写代码；2025年Spec Cod
 date: '2026-03-28'
 tags: ['精读', 'AI编程', 'Vibe Coding', 'Spec Coding', 'Harness Engineer', '范式跃迁']
 category: AI与Agent
+type: read
 ---
 
 > 来源：知乎 | 原文链接：[从 Vibe Coding 到 Spec Coding 再到 Harness Engineer：AI 编程的三次范式跃迁](https://www.zhihu.com/question/2016648624256340425/answer/2018446438896522524) | 日期：2026年3月20日

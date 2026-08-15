@@ -4,6 +4,7 @@ description: '作者介绍了OpenCLI这个跨平台操作工具，它可以绕�
 date: '2026-03-29 21:42:30'
 tags: ['收藏', 'auto:tech', 'OpenCLI', '多平台自动化', '浏览器控制']
 category: AI与Agent
+type: collect
 ---
 
 > **来源**：知乎 · 专栏

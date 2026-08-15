@@ -4,6 +4,7 @@ description: '从个人使用 Claude/Codex 的经验出发，探讨 vibe coding 
 date: '2026-03-28 19:29:30'
 tags: ['精读', 'AI编程', 'Vibe Coding', 'Agent开发', '文档工程', '团队协作']
 category: AI与Agent
+type: read
 ---
 
 > 来源：知乎 | 原文链接：[我是怎么 vibe coding 的](https://zhuanlan.zhihu.com/p/2021225970527417846) | 日期：2026年3月28日
