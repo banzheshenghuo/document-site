@@ -44,7 +44,7 @@ const searchIndex = sortedDocs.map(doc => ({
 
 // 默认显示全部文档
 let activeDocs = sortedDocs
-let activeTab = 'all'
+let activeType = 'all'
 ---
 
 <BaseLayout>
@@ -82,55 +82,75 @@ let activeTab = 'all'
     <section class="docs-section">
       <h2 class="section-title">
         <div class="filter-group">
-          <span class="filter-label">阅读类型</span>
+          <span class="filter-label">类型</span>
           <div class="tabs-container">
-          <button
-            class={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
-            id="tab-all"
-            onclick="switchTab('all')"
-          >
-            全部 <span class="tab-count">({sortedDocs.length})</span>
-          </button>
-          <button
-            class={`tab-button ${activeTab === 'read' ? 'active' : ''}`}
-            id="tab-read"
-            onclick="switchTab('read')"
-          >
-            精读 <span class="tab-count">({readDocs.length})</span>
-          </button>
-          <button
-            class={`tab-button ${activeTab === 'collect' ? 'active' : ''}`}
-            id="tab-collect"
-            onclick="switchTab('collect')"
-          >
-            收藏 <span class="tab-count">({collectDocs.length})</span>
-          </button>
-          <button
-            class={`tab-button ${activeTab === 'today' ? 'active' : ''}`}
-            id="tab-today"
-            onclick="switchTab('today')"
-          >
-            今天 <span class="tab-count" id="today-count">(0)</span>
-          </button>
+            <button
+              class={`tab-button ${activeType === 'all' ? 'active' : ''}`}
+              data-type-filter="all"
+            >
+              全部 <span class="tab-count">({sortedDocs.length})</span>
+            </button>
+            <button
+              class={`tab-button ${activeType === 'read' ? 'active' : ''}`}
+              data-type-filter="read"
+            >
+              精读 <span class="tab-count">({readDocs.length})</span>
+            </button>
+            <button
+              class={`tab-button ${activeType === 'collect' ? 'active' : ''}`}
+              data-type-filter="collect"
+            >
+              收藏 <span class="tab-count">({collectDocs.length})</span>
+            </button>
           </div>
         </div>
         <div class="filter-group">
-          <span class="filter-label">主题分类</span>
-          <div class="pills-container" id="pillsContainer">
-          <button
-            class={`pill-button ${activeTab === 'all' ? 'active' : ''}`}
-            data-category-filter="all"
-          >
-            全部分类 <span class="pill-count">({sortedDocs.length})</span>
-          </button>
-          {categories.map(c => (
+          <span class="filter-label">时间</span>
+          <div class="tabs-container">
             <button
-              class="pill-button"
-              data-category-filter={c.name}
+              class="tab-button active"
+              data-time-filter="all"
             >
-              {c.name} <span class="pill-count">({c.count})</span>
+              全部 <span class="tab-count">({sortedDocs.length})</span>
             </button>
-          ))}
+            <button
+              class="tab-button"
+              data-time-filter="today"
+            >
+              今天 <span class="tab-count" id="count-today">(0)</span>
+            </button>
+            <button
+              class="tab-button"
+              data-time-filter="3d"
+            >
+              近3天 <span class="tab-count" id="count-3d">(0)</span>
+            </button>
+            <button
+              class="tab-button"
+              data-time-filter="7d"
+            >
+              近7天 <span class="tab-count" id="count-7d">(0)</span>
+            </button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">主题</span>
+          <div class="pills-container" id="pillsContainer">
+            <button
+              class="pill-button active"
+              data-category-filter="all"
+            >
+              全部 <span class="pill-count">({sortedDocs.length})</span>
+            </button>
+            {categories.map(c => (
+              <button
+                class="pill-button"
+                data-category-filter={c.name}
+              >
+                {c.name} <span class="pill-count">({c.count})</span>
+              </button>
+            ))}
+          </div>
         </div>
       </h2>
 
@@ -149,14 +169,9 @@ let activeTab = 'all'
         ))}
       </div>
 
-      {activeDocs.length === 0 && (
-        <div class="empty-state">
-          {activeTab === 'read' && <p>暂无精读文章</p>}
-          {activeTab === 'collect' && <p>暂无收藏文章</p>}
-          {activeTab === 'today' && <p>今天还没有添加新文章</p>}
-          {activeTab === 'all' && <p>暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。</p>}
-        </div>
-      )}
+      <div class="empty-state" style="display:none;">
+        <p>暂无文档，请在 <code>src/content/posts</code> 目录下添加 Markdown 文件。</p>
+      </div>
 
       <div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
         <button class="load-more-btn" id="loadMoreBtn">加载更多</button>
@@ -169,51 +184,51 @@ let activeTab = 'all'
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
-    let activeTab = 'all'
+    let activeType = 'all'
+    let activeTime = 'all'
     let activeCategory = 'all'
     let visibleCount = PAGE_SIZE
 
-    // 动态计算"今天"的文章数量
-    function updateTodayCount() {
-      const allCards = document.querySelectorAll('.doc-card')
-      let count = 0
-      allCards.forEach(card => {
-        const cardTime = card.getAttribute('data-date') || ''
-        if (cardTime) {
-          const cardDate = new Date(cardTime)
-          const cardDay = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate())
-          if (cardDay.getTime() === today.getTime()) count++
-        }
-      })
-      const el = document.getElementById('today-count')
-      if (el) el.textContent = `(${count})`
+    // 时间维度计数（今天 / 近3天 / 近7天，构建时静态、访问时动态）
+    function dayStart(dateStr) {
+      const d = new Date(dateStr)
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
     }
-    updateTodayCount()
 
-    // 判断卡片是否匹配当前 tab
-    function cardMatchesTab(card, tab) {
-      const type = card.getAttribute('data-type')
-      switch (tab) {
-        case 'read':
-          return type === 'read'
-        case 'collect':
-          return type === 'collect'
-        case 'today':
-          const cardTime = card.getAttribute('data-date') || ''
-          if (!cardTime) return false
-          const cardDate = new Date(cardTime)
-          const cardDay = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate())
-          return cardDay.getTime() === today.getTime()
-        default:
-          return true
+    function updateTimeCounts() {
+      const counts = { today: 0, '3d': 0, '7d': 0 }
+      const nowDay = today.getTime()
+      const DAY = 86400000
+      document.querySelectorAll('.doc-card').forEach(card => {
+        const cardTime = card.getAttribute('data-date') || ''
+        if (!cardTime) return
+        const diff = nowDay - dayStart(cardTime)
+        if (diff === 0) counts.today++
+        if (diff >= 0 && diff < 3 * DAY) counts['3d']++
+        if (diff >= 0 && diff < 7 * DAY) counts['7d']++
+      })
+      for (const key of Object.keys(counts)) {
+        const el = document.getElementById(`count-${key}`)
+        if (el) el.textContent = `(${counts[key]})`
       }
     }
+    updateTimeCounts()
 
-    function switchTab(tab) {
-      activeTab = tab
-      visibleCount = PAGE_SIZE
-      updateTabButtons()
-      updateDocGrid()
+    function cardMatchesType(card) {
+      if (activeType === 'all') return true
+      return card.getAttribute('data-type') === activeType
+    }
+
+    function cardMatchesTime(card) {
+      if (activeTime === 'all') return true
+      const cardTime = card.getAttribute('data-date') || ''
+      if (!cardTime) return false
+      const diff = today.getTime() - dayStart(cardTime)
+      const DAY = 86400000
+      if (activeTime === 'today') return diff === 0
+      if (activeTime === '3d') return diff >= 0 && diff < 3 * DAY
+      if (activeTime === '7d') return diff >= 0 && diff < 7 * DAY
+      return true
     }
 
     function cardMatchesCategory(card) {
@@ -221,25 +236,42 @@ let activeTab = 'all'
       return (card.getAttribute('data-category') || '其他') === activeCategory
     }
 
-    function switchCategory(cat) {
-      activeCategory = cat
+    function switchType(t) {
+      activeType = t
       visibleCount = PAGE_SIZE
-      document.querySelectorAll('.pill-button').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-category-filter') === cat)
-      })
+      setGroupActive('data-type-filter', t)
       updateDocGrid()
     }
 
-    document.querySelectorAll('.pill-button').forEach(btn => {
-      btn.addEventListener('click', () => switchCategory(btn.getAttribute('data-category-filter')))
-    })
+    function switchTime(t) {
+      activeTime = t
+      visibleCount = PAGE_SIZE
+      setGroupActive('data-time-filter', t)
+      updateDocGrid()
+    }
 
-    function updateTabButtons() {
-      document.querySelectorAll('.tab-button').forEach(btn => {
-        const tab = btn.id.replace('tab-', '')
-        btn.classList.toggle('active', tab === activeTab)
+    function switchCategory(cat) {
+      activeCategory = cat
+      visibleCount = PAGE_SIZE
+      setGroupActive('data-category-filter', cat)
+      updateDocGrid()
+    }
+
+    function setGroupActive(attr, value) {
+      document.querySelectorAll(`[${attr}]`).forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute(attr) === value)
       })
     }
+
+    document.querySelectorAll('[data-type-filter]').forEach(btn => {
+      btn.addEventListener('click', () => switchType(btn.getAttribute('data-type-filter')))
+    })
+    document.querySelectorAll('[data-time-filter]').forEach(btn => {
+      btn.addEventListener('click', () => switchTime(btn.getAttribute('data-time-filter')))
+    })
+    document.querySelectorAll('[data-category-filter]').forEach(btn => {
+      btn.addEventListener('click', () => switchCategory(btn.getAttribute('data-category-filter')))
+    })
 
     function updateDocGrid() {
       const emptyState = document.querySelector('.empty-state')
@@ -250,7 +282,7 @@ let activeTab = 'all'
       let matchIndex = 0
 
       allCards.forEach(card => {
-        if (cardMatchesTab(card, activeTab) && cardMatchesCategory(card)) {
+        if (cardMatchesType(card) && cardMatchesTime(card) && cardMatchesCategory(card)) {
           if (matchIndex < visibleCount) {
             card.style.display = ''
             observeCard(card)
@@ -268,10 +300,13 @@ let activeTab = 'all'
         emptyState.style.display = 'block'
         const p = emptyState.querySelector('p')
         if (p) {
-          const msgs = { read: '暂无精读文章', collect: '暂无收藏文章', today: '今天还没有添加新文章' }
-          let msg = msgs[activeTab] || '暂无文档'
-          if (activeCategory !== 'all') msg = `「${activeCategory}」分类下${activeTab === 'all' ? '暂无文章' : '暂无匹配文章'}`
-          p.textContent = msg
+          const typeNames = { read: '精读', collect: '收藏' }
+          const timeNames = { today: '今天', '3d': '近3天', '7d': '近7天' }
+          const parts = []
+          if (activeType !== 'all') parts.push(typeNames[activeType])
+          if (activeTime !== 'all') parts.push(timeNames[activeTime])
+          if (activeCategory !== 'all') parts.push(`「${activeCategory}」`)
+          p.textContent = parts.length ? `${parts.join(' + ')} 筛选下暂无文章` : '暂无文档'
         }
       }
 
@@ -469,7 +504,7 @@ let activeTab = 'all'
   /* ===== 筛选组：两维共用同一按钮语言，行标区分维度 ===== */
   .filter-group {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.625rem;
     width: 100%;
     min-width: 0;
@@ -482,6 +517,10 @@ let activeTab = 'all'
     letter-spacing: 0.08em;
     flex-shrink: 0;
     opacity: 0.8;
+    /* 与首行按钮顶对齐：label 高度等于按钮首行高度并垂直居中 */
+    height: 36px;
+    display: flex;
+    align-items: center;
   }
 
   .tabs-container,
@@ -638,6 +677,10 @@ let activeTab = 'all'
       padding: 0.375rem 0.75rem;
       font-size: 0.75rem;
       min-height: 44px;
+    }
+
+    .filter-label {
+      height: 44px;
     }
 
     .docs-grid {
