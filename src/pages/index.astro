@@ -81,7 +81,9 @@ let activeTab = 'all'
 
     <section class="docs-section">
       <h2 class="section-title">
-        <div class="tabs-container">
+        <div class="filter-group">
+          <span class="filter-label">阅读类型</span>
+          <div class="tabs-container">
           <button
             class={`tab-button ${activeTab === 'all' ? 'active' : ''}`}
             id="tab-all"
@@ -110,8 +112,11 @@ let activeTab = 'all'
           >
             今天 <span class="tab-count" id="today-count">(0)</span>
           </button>
+          </div>
         </div>
-        <div class="pills-container" id="pillsContainer">
+        <div class="filter-group">
+          <span class="filter-label">主题分类</span>
+          <div class="pills-container" id="pillsContainer">
           <button
             class={`pill-button ${activeTab === 'all' ? 'active' : ''}`}
             data-category-filter="all"
@@ -461,19 +466,40 @@ let activeTab = 'all'
     gap: 0.75rem;
   }
 
-  .tabs-container {
+  /* ===== 筛选组：两维共用同一按钮语言，行标区分维度 ===== */
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filter-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+    opacity: 0.8;
+  }
+
+  .tabs-container,
+  .pills-container {
     display: flex;
     gap: 0.375rem;
     flex-wrap: wrap;
     justify-content: flex-start;
+    min-width: 0;
   }
 
-  .tab-button {
-    padding: 0.4rem 0.875rem;
+  .tab-button,
+  .pill-button {
+    padding: 0.375rem 0.875rem;
     border: 1px solid var(--color-border);
     background: var(--color-bg);
     color: var(--color-text-secondary);
-    border-radius: 6px;
+    border-radius: 999px;
     cursor: pointer;
     font-family: var(--font-mono);
     font-size: 0.8125rem;
@@ -482,69 +508,33 @@ let activeTab = 'all'
     display: flex;
     align-items: center;
     gap: 0.375rem;
+    min-height: 36px;
+    box-sizing: border-box;
   }
 
-  .tab-button:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background: rgba(37, 99, 235, 0.06);
-  }
-
-  .tab-button.active {
-    border-color: var(--color-primary);
-    background: var(--color-primary);
-    color: white;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-  }
-
-  .tab-count {
-    font-size: 0.6875rem;
-    opacity: 0.6;
-  }
-
-  /* ===== Category Pills ===== */
-  .pills-container {
-    display: flex;
-    gap: 0.375rem;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-
-  .pill-button {
-    padding: 0.3rem 0.8125rem;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg);
-    color: var(--color-text-secondary);
-    border-radius: 999px;
-    cursor: pointer;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
-    transition: all 0.25s;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    min-height: 44px;
-  }
-
+  .tab-button:hover,
   .pill-button:hover {
     border-color: var(--color-primary);
     color: var(--color-primary);
     background: rgba(37, 99, 235, 0.06);
   }
 
+  .tab-button.active,
   .pill-button.active {
     border-color: var(--color-primary);
     background: var(--color-primary);
     color: white;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
   }
 
-  .pill-button.active:active {
+  .tab-button:active,
+  .pill-button:active {
     transform: translateY(1px);
   }
 
+  .tab-count,
   .pill-count {
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     opacity: 0.6;
   }
 
@@ -637,28 +627,22 @@ let activeTab = 'all'
       font-size: 1.1rem;
     }
 
-    .tabs-container {
-      overflow-x: auto;
-      flex-wrap: nowrap;
-      -webkit-overflow-scrolling: touch;
-    }
-
+    .tabs-container,
     .pills-container {
       overflow-x: auto;
       flex-wrap: nowrap;
       -webkit-overflow-scrolling: touch;
-      width: 100%;
+      flex: 1;
+      min-width: 0;
     }
 
+    .tab-button,
     .pill-button {
       white-space: nowrap;
       flex-shrink: 0;
-    }
-
-    .tab-button {
       padding: 0.375rem 0.75rem;
       font-size: 0.75rem;
-      white-space: nowrap;
+      min-height: 44px;
     }
 
     .docs-grid {

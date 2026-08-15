@@ -54,14 +54,7 @@ const typeLabel = prefix || (articleType === 'read' ? '精读' : articleType ===
 const displayTitle = titleWithoutPrefix || title
 ---
 <article class={`doc-card ${articleType ? `doc-card--${articleType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)} data-date={date || ''} data-category={category || ''} data-type={articleType || ''}>
-  {typeLabel && (
-    <div class={`doc-card-bar doc-card-bar--${articleType || 'default'}`}>
-      <span class="doc-card-bar-label">{typeLabel}</span>
-    </div>
-  )}
-  {!typeLabel && (
-    <div class="doc-card-bar doc-card-bar--default"></div>
-  )}
+  <div class={`doc-card-bar doc-card-bar--${articleType || 'default'}`}></div>
   <a href={`${basePath}/posts/${slug}`} class="doc-card-link">
     <div class="doc-card-content">
       <h2 class="doc-card-title">{displayTitle}</h2>
@@ -69,6 +62,9 @@ const displayTitle = titleWithoutPrefix || title
         <p class="doc-card-description">{description}</p>
       )}
       <div class="doc-card-meta">
+        {typeLabel && (
+          <span class={`doc-card-type doc-card-type--${articleType}`}>{typeLabel}</span>
+        )}
         {date && <time class="doc-card-date">{formatDate(date)}</time>}
         {tags.length > 0 && (
           <div class="doc-card-tags">
@@ -204,6 +200,31 @@ const displayTitle = titleWithoutPrefix || title
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
+  }
+
+  /* 类型 chip（精读/收藏），与日期、标签同处 meta 行 */
+  .doc-card-type {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 500;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .doc-card-type--read {
+    color: var(--color-primary);
+    background: rgba(37, 99, 235, 0.08);
+  }
+
+  .doc-card-type--collect {
+    color: #b45309;
+    background: rgba(245, 158, 11, 0.12);
+  }
+
+  :global(html[data-theme='dark']) .doc-card-type--collect {
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.15);
   }
 
   .doc-card-date {

@@ -37,14 +37,16 @@
 
 ## 4. Component Stylings
 
-- **Tab（第一维筛选：内容类型）**：6px 圆角矩形。默认 border + Zinc-500 文字；
-  hover 边框与文字转 Signal Blue + 6% 蓝底；active 为 Signal Blue 实底白字 +
-  `0 2px 8px rgba(37,99,235,0.25)` 柔影。计数用 0.6875rem、60% 透明度。
-- **Category Pill（第二维筛选：主题分类）**：999px 全圆角胶囊，与 Tab 区分维度。
-  默认 Ghost（border + Muted Steel 文字）；hover 转蓝边蓝字；active 为
-  Signal Blue 实底白字。整行 flex-wrap，移动端横向滚动不换行。
-- **Card**：0.5rem 圆角、1px Whisper Border、3px 顶条区分内容类型、
-  右上角 mono 序号（decimal-leading-zero，35% 透明度，hover 转蓝 80%）。
+- **Filter Chip（筛选按钮，两维统一语言）**：999px 胶囊、mono 0.8125rem、
+  min-height 36px（移动端 44px）。默认 border + Zinc-500 文字；hover 边框与文字
+  转 Signal Blue + 6% 蓝底；active 为 Signal Blue 实底白字 +
+  `0 2px 8px rgba(37,99,235,0.25)` 柔影，active 按压 -1px。计数 0.6875rem、60% 透明度。
+  两个筛选维度（阅读类型/主题分类）**共用同一按钮样式**，靠行首 mono 行标
+  （0.6875rem、Muted Steel）区分维度。移动端行内横向滚动，行标固定不滚。
+- **Card**：0.5rem 圆角、1px Whisper Border、3px 纯色顶条（蓝=精读 / 琥珀=收藏 /
+  灰=无类型，**不放文字**）、右上角 mono 序号（decimal-leading-zero，35% 透明度，
+  hover 转蓝 80%）。类型文字在 meta 行以 chip 呈现：精读=8% 蓝底蓝字、
+  收藏=12% 琥珀底琥珀字（dark 模式 #fbbf24 / 15% 琥珀底），4px 圆角 mono 0.625rem。
   hover：-4px translateY + 边框转 25% 蓝 + 鼠标跟踪径向微光（6% 蓝）。
 - **Empty State**：居中、4rem 留白、Muted Steel 文案，明确指出该分类/筛选无内容，绝不放 "No data"。
 - **Buttons**：扁平面 + 1px 边框，active 时 -1px 视觉下压；无外发光、无自定义光标。
@@ -53,7 +55,7 @@
 
 - 首页容器 max-width 900px 居中；卡片网格 `repeat(auto-fill, minmax(280px, 1fr))`，gap 1.25rem
 - Hero 左对齐（Variance > 4，禁止居中 Hero）；统计行用 4px 圆点分隔，mono 数字
-- 两维筛选各自独立成行：Tab 行在上、Category Pill 行在下，垂直 gap 0.75rem
+- 两维筛选各自独立成行，垂直 gap 0.75rem：每行 = mono 行标 + 胶囊按钮组（阅读类型 / 主题分类）
 - 移动端（< 640px）：网格塌陷单列、pill 行横向滚动、触控目标 ≥ 44px
 - 禁止：元素重叠、绝对定位堆叠、flex 百分比算术、`calc()` hack
 
