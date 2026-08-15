@@ -1,4 +1,5 @@
 ---
+category: AI与Agent
 title: "Hermes Agent 深度解析：单 Agent 架构的颠覆性设计"
 slug: hermes-agent-deep-dive
 date: 2026-04-09

@@ -25,6 +25,15 @@ const collectDocs = sortedDocs.filter(doc => {
   return tags.includes('收藏') || tags.includes('归档') || tags.includes('书签')
 })
 
+// 分类定义与计数（固定展示顺序）
+const CATEGORY_ORDER = ['AI与Agent', '技术', '开源库与工具', '金融', '认知迭代', '知识管理', '职业发展', '心理学', '生活', '其他']
+const categoryCounts = new Map<string, number>()
+sortedDocs.forEach(doc => {
+  const c = doc.data.category || '其他'
+  categoryCounts.set(c, (categoryCounts.get(c) || 0) + 1)
+})
+const categories = CATEGORY_ORDER.map(c => ({ name: c, count: categoryCounts.get(c) || 0 }))
+
 // 收集所有标签
 const allTags = new Set<string>()
 sortedDocs.forEach(doc => {
@@ -109,6 +118,22 @@ let activeTab = 'all'
             今天 <span class="tab-count" id="today-count">(0)</span>
           </button>
         </div>
+        <div class="pills-container" id="pillsContainer">
+          <button
+            class={`pill-button ${activeTab === 'all' ? 'active' : ''}`}
+            data-category-filter="all"
+          >
+            全部分类 <span class="pill-count">({sortedDocs.length})</span>
+          </button>
+          {categories.map(c => (
+            <button
+              class="pill-button"
+              data-category-filter={c.name}
+            >
+              {c.name} <span class="pill-count">({c.count})</span>
+            </button>
+          ))}
+        </div>
       </h2>
 
       <div class="docs-grid">
@@ -119,6 +144,7 @@ let activeTab = 'all'
             description={doc.data.description}
             date={doc.data.date}
             tags={doc.data.tags}
+            category={doc.data.category || '其他'}
             data-tags={JSON.stringify(doc.data.tags || [])}
           />
         ))}
@@ -145,6 +171,7 @@ let activeTab = 'all'
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
     let activeTab = 'all'
+    let activeCategory = 'all'
     let visibleCount = PAGE_SIZE
 
     // 动态计算"今天"的文章数量
@@ -191,6 +218,24 @@ let activeTab = 'all'
       updateDocGrid()
     }
 
+    function cardMatchesCategory(card) {
+      if (activeCategory === 'all') return true
+      return (card.getAttribute('data-category') || '其他') === activeCategory
+    }
+
+    function switchCategory(cat) {
+      activeCategory = cat
+      visibleCount = PAGE_SIZE
+      document.querySelectorAll('.pill-button').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-category-filter') === cat)
+      })
+      updateDocGrid()
+    }
+
+    document.querySelectorAll('.pill-button').forEach(btn => {
+      btn.addEventListener('click', () => switchCategory(btn.getAttribute('data-category-filter')))
+    })
+
     function updateTabButtons() {
       document.querySelectorAll('.tab-button').forEach(btn => {
         const tab = btn.id.replace('tab-', '')
@@ -207,7 +252,7 @@ let activeTab = 'all'
       let matchIndex = 0
 
       allCards.forEach(card => {
-        if (cardMatchesTab(card, activeTab)) {
+        if (cardMatchesTab(card, activeTab) && cardMatchesCategory(card)) {
           if (matchIndex < visibleCount) {
             card.style.display = ''
             observeCard(card)
@@ -226,7 +271,9 @@ let activeTab = 'all'
         const p = emptyState.querySelector('p')
         if (p) {
           const msgs = { read: '暂无精读文章', collect: '暂无收藏文章', today: '今天还没有添加新文章' }
-          p.textContent = msgs[activeTab] || '暂无文档'
+          let msg = msgs[activeTab] || '暂无文档'
+          if (activeCategory !== 'all') msg = `「${activeCategory}」分类下${activeTab === 'all' ? '暂无文章' : '暂无匹配文章'}`
+          p.textContent = msg
         }
       }
 
@@ -344,7 +391,7 @@ let activeTab = 'all'
   }
 
   .hero-content::before {
-    content: "// KNOWLEDGE BASE";
+    content: "KNOWLEDGE BASE";
     display: block;
     font-family: var(--font-mono);
     font-size: 0.75rem;
@@ -416,8 +463,9 @@ let activeTab = 'all'
     font-weight: 700;
     margin-bottom: 1.5rem;
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
 
   .tabs-container {
@@ -458,6 +506,52 @@ let activeTab = 'all'
 
   .tab-count {
     font-size: 0.6875rem;
+    opacity: 0.6;
+  }
+
+  /* ===== Category Pills ===== */
+  .pills-container {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .pill-button {
+    padding: 0.3rem 0.8125rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 44px;
+  }
+
+  .pill-button:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(37, 99, 235, 0.06);
+  }
+
+  .pill-button.active {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .pill-button.active:active {
+    transform: translateY(1px);
+  }
+
+  .pill-count {
+    font-size: 0.625rem;
     opacity: 0.6;
   }
 
@@ -554,6 +648,18 @@ let activeTab = 'all'
       overflow-x: auto;
       flex-wrap: nowrap;
       -webkit-overflow-scrolling: touch;
+    }
+
+    .pills-container {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+    }
+
+    .pill-button {
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .tab-button {

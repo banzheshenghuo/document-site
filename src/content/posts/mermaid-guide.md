@@ -1,4 +1,5 @@
 ---
+category: 技术
 title: 'Mermaid 图表完整指南'
 description: '了解如何在文档中使用 Mermaid 创建各种类型的图表，包括流程图、序列图、类图、状态图等。'
 date: '2026-03-27'

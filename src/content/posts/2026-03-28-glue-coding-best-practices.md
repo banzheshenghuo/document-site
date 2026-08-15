@@ -3,7 +3,7 @@ title: '97.9%采纳率，胶水编程：业务需求出码最佳实践'
 description: '天猫团队通过"胶水编程"方法，将AI代码采纳率从50%提升到97.9%的实践经验'
 date: '2026-03-28'
 tags: ['精读', 'AI Coding', '胶水编程', '物料体系', '工程化', '最佳实践']
-category: '技术解读'
+category: AI与Agent
 ---
 
 > 来源：大淘宝技术 | 原文链接：[97.9%采纳率，胶水编程：业务需求出码最佳实践](https://mp.weixin.qq.com/s/G3aKbzdGUyD2h1aVjvbr2g) | 日期：2026年3月27日

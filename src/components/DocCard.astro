@@ -5,6 +5,7 @@ export interface Props {
   description?: string
   date?: string
   tags?: string[]
+  category?: string
   'data-tags'?: string
 }
 
@@ -14,6 +15,7 @@ const {
   description,
   date,
   tags = [],
+  category,
   'data-tags': dataTags
 } = Astro.props
 
@@ -47,7 +49,7 @@ const { prefix, titleWithoutPrefix } = getPrefix(title)
 const prefixType = getPrefixType(prefix)
 const displayTitle = titleWithoutPrefix || title
 ---
-<article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)} data-date={date || ''}>
+<article class={`doc-card ${prefixType ? `doc-card--${prefixType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)} data-date={date || ''} data-category={category || ''}>
   {prefix && (
     <div class={`doc-card-bar doc-card-bar--${prefixType || 'default'}`}>
       <span class="doc-card-bar-label">{prefix}</span>

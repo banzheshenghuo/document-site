@@ -1,7 +1,7 @@
 ---
 title: '深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践'
 date: 2026-04-20T12:15:00+08:00
-category: 技术实践
+category: AI与Agent
 tags: ['精读', 'auto:tech', 'Claude-Code', 'Agent', 'Prompt-Engineering', 'Context-Engineering', 'Harness-Engineering', 'AI-Coding']
 description: '从三大工程维度拆解 Claude Code 的系统设计哲学与实现细节'
 ---

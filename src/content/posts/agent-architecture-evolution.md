@@ -3,7 +3,7 @@ title: 'Agent架构演进与技术选型：从Single Agent到Agent Teams'
 description: '深入分析Agent架构的演进路径，从Single Agent到Multi-Agent、Agent Skills、Agent Teams的演化过程及科学选型方法论'
 date: '2026-03-17'
 tags: ['精读', 'Agent', '架构设计', '技术选型', 'Multi-Agent', 'LLM']
-category: '技术架构'
+category: AI与Agent
 ---
 
 # Agent/Skills/Teams 架构演进过程及技术选型之道

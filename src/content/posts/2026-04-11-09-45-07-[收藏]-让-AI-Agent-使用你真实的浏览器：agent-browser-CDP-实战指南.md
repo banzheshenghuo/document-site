@@ -3,7 +3,7 @@ title: '🚀 让 AI Agent 使用你真实的浏览器：agent-browser + CDP 实�
 description: '介绍如何使用 agent-browser 和 Chrome DevTools Protocol (CDP) 让 AI Agent 连接到真实的 Chrome 浏览器，绕过反爬虫检测，保留登录态。'
 date: "2026-04-11 09:45:07"
 tags: ['收藏', 'auto:tech', 'AI', '浏览器', 'Chrome', 'CDP', '自动化']
-category: '收藏'
+category: 开源库与工具
 ---
 
 > **来源**：知乎

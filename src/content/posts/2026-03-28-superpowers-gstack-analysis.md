@@ -3,7 +3,7 @@ title: '深度拆解 Superpowers 和 gstack：AI 编程真正的差距，不在�
 description: 'Superpowers 是能力编排系统，gstack 是组织流程系统。它们都在重塑 AI 编程，但走的是两条完全不同的路。'
 date: '2026-03-28'
 tags: ['精读', 'AI编程', 'Superpowers', 'gstack', 'Agent架构', '工作流']
-category: '技术解读'
+category: AI与Agent
 ---
 
 > 来源：知乎 | 原文链接：[深度拆解 Superpowers 和 gstack：AI 编程真正的差距，不在模型，在工作流](https://zhuanlan.zhihu.com/p/2019440154893374100) | 日期：2026年3月23日

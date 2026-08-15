@@ -3,7 +3,7 @@ title: DeepMind创始人访谈:忽强忽弱的AI才是真正的灾难,突破在�
 date: 2026-04-10
 description: DeepMind创始人Demis Hassabis深度访谈,关于AGI、算力瓶颈、记忆系统和未来5年的预言
 tags: [DeepMind, AGI, Demis Hassabis, AI访谈, 未来预测]
-category: AI前沿
+category: AI与Agent
 image: /images/deepmind-interview.jpg
 ---
 

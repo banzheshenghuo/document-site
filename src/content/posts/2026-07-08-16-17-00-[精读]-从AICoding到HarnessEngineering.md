@@ -1,7 +1,7 @@
 ---
 title: '从AI Coding到Harness Engineering的端到端工程开发实践'
 date: 2026-07-08T16:17:00+08:00
-category: 技术实践
+category: AI与Agent
 tags: ['精读', 'auto:tech', 'Harness', 'AI Coding', 'Agent', '知识库工程', '端到端开发', 'DevOps']
 description: 腾讯应用宝团队从对话式AI Coding升级到Harness Engineering的完整实践路径与架构设计
 ---

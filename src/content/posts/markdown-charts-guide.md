@@ -3,7 +3,7 @@ title: 'Markdown 图表完全指南'
 description: '展示所有支持的图表类型，包括 Mermaid 流程图、序列图、类图、ER图、思维导图等'
 date: '2026-03-27'
 tags: ['Mermaid', '图表', '文档', '指南']
-category: '文档'
+category: 技术
 ---
 
 # Markdown 图表完全指南

@@ -3,7 +3,7 @@ title: '深度拆解 Superpowers 和 gstack：AI 编程真正的差距，不在�
 description: '深度解析 Superpowers 和 gstack 两个 AI 编程工具的核心差异，探讨技能驱动与角色驱动的不同设计哲学，以及如何在实际项目中落地使用。'
 date: "2026-04-11 16:48:42"
 tags: ['收藏', 'auto:tech', 'AI', '编程', 'Superpowers', 'gstack', 'Claude Code', '工作流', 'Agent']
-category: '收藏'
+category: AI与Agent
 ---
 
 > **来源**：知乎

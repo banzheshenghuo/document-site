@@ -1,7 +1,7 @@
 ---
 title: 'Claude Code团队官方定义：Agent循环机制完整指南'
 date: 2026-07-07T18:01:00+08:00
-category: '技术实践'
+category: AI与Agent
 tags: ['精读', 'auto:tech', 'Claude Code', 'AI Agent', 'Loop循环', 'Prompt Engineering', 'Token优化']
 description: 'Claude Code官方解读Agent循环四分类及质量控制与Token管理策略'
 ---

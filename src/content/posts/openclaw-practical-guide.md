@@ -3,7 +3,7 @@ title: OpenClaw实战：从"能聊天"到"能干活"的工程实践
 date: 2026-04-10
 description: 一个人、一台Mac、六个AI Agent - 深入解析OpenClaw多Agent系统的工程设计与实战经验
 tags: [OpenClaw, AI Agent, 多Agent系统, 自动化, 工程实践]
-category: AI工程
+category: AI与Agent
 image: /images/ai-agent-team.jpg
 ---
 

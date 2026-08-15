@@ -1,7 +1,7 @@
 ---
 title: '从玩具到生产力：用真实项目讲透 AI Agent 的 Harness Engineering'
 date: 2026-04-21T08:53:00+08:00
-category: 技术实践
+category: AI与Agent
 tags: ['精读', 'auto:tech', 'Harness-Engineering', 'AI-Agent', '非确定性工程', '控制面', 'Spec-Driven', '企业AI', '契约式设计']
 description: '基于 Aegis 真实项目实践，系统阐述如何通过 Harness Engineering 将大模型从高级玩具转化为工程协作的确定性协作者'
 ---
