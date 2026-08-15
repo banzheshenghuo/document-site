@@ -44,8 +44,7 @@
   两个筛选维度（阅读类型/主题分类）**共用同一按钮样式**，靠行首 mono 行标
   （0.6875rem、Muted Steel）区分维度。移动端行内横向滚动，行标固定不滚。
 - **Card**：0.5rem 圆角、1px Whisper Border、3px 纯色顶条（蓝=精读 / 琥珀=收藏 /
-  灰=无类型，**不放文字**）、右上角 mono 序号（decimal-leading-zero，35% 透明度，
-  hover 转蓝 80%）。类型文字在 meta 行以 chip 呈现：精读=8% 蓝底蓝字、
+  灰=无类型，**不放文字**）。类型文字在 meta 行以 chip 呈现：精读=8% 蓝底蓝字、
   收藏=12% 琥珀底琥珀字（dark 模式 #fbbf24 / 15% 琥珀底），4px 圆角 mono 0.625rem。
   hover：-4px translateY + 边框转 25% 蓝 + 鼠标跟踪径向微光（6% 蓝）。
 - **Empty State**：居中、4rem 留白、Muted Steel 文案，明确指出该分类/筛选无内容，绝不放 "No data"。

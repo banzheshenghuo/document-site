@@ -1,5 +1,5 @@
 export const SITE = {
-  title: '安昙的知识库',
+  title: '安昙',
   description: '由 AI 生成的技术文档集合',
   defaultLang: 'zh-CN'
 }
