@@ -9,8 +9,7 @@ import { ExpressiveCodeBlock } from 'expressive-code'
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://banzheshenghuo.github.io',
-  base: '/document-site',
+  site: 'https://doc.banzheshenghuo.com',
   integrations: [
     expressiveCode({
       themes: ['dark-plus', 'light-plus'],

@@ -6,7 +6,7 @@ export interface Props {
   date?: string
   tags?: string[]
   category?: string
-  type?: 'read' | 'collect'
+  type?: 'read' | 'collect' | 'note'
   'data-tags'?: string
 }
 
@@ -30,10 +30,11 @@ function getPrefix(title: string) {
 }
 
 // 获取前缀类型
-function getPrefixType(prefix: string | null): 'read' | 'collect' | null {
+function getPrefixType(prefix: string | null): 'read' | 'collect' | 'note' | null {
   if (!prefix) return null
   if (prefix === '精读' || prefix === '解读' || prefix === '深度') return 'read'
   if (prefix === '收藏' || prefix === '归档' || prefix === '书签') return 'collect'
+  if (prefix === '笔记' || prefix === '学习') return 'note'
   return null
 }
 
@@ -50,7 +51,7 @@ function formatDate(dateStr: string): string {
 const { prefix, titleWithoutPrefix } = getPrefix(title)
 // 显式 type 字段优先，标题前缀解析仅作历史文章兜底
 const articleType = type || getPrefixType(prefix)
-const typeLabel = prefix || (articleType === 'read' ? '精读' : articleType === 'collect' ? '收藏' : null)
+const typeLabel = prefix || (articleType === 'read' ? '精读' : articleType === 'collect' ? '收藏' : articleType === 'note' ? '笔记' : null)
 const displayTitle = titleWithoutPrefix || title
 ---
 <article class={`doc-card ${articleType ? `doc-card--${articleType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)} data-date={date || ''} data-category={category || ''} data-type={articleType || ''}>
@@ -68,7 +69,7 @@ const displayTitle = titleWithoutPrefix || title
         {date && <time class="doc-card-date">{formatDate(date)}</time>}
         {tags.length > 0 && (
           <div class="doc-card-tags">
-            {tags.filter(t => !['精读','解读','深度','收藏','归档','书签'].includes(t)).slice(0, 3).map(tag => (
+            {tags.filter(t => !['精读','解读','深度','收藏','归档','书签','笔记','学习'].includes(t)).slice(0, 3).map(tag => (
               <span class="doc-card-tag">{tag}</span>
             ))}
           </div>
@@ -128,6 +129,10 @@ const displayTitle = titleWithoutPrefix || title
     background: linear-gradient(90deg, #f59e0b, #ef4444);
   }
 
+  .doc-card-bar--note {
+    background: linear-gradient(90deg, #10b981, #059669);
+  }
+
   .doc-card-bar--default {
     background: linear-gradient(90deg, #94a3b8, #cbd5e1);
   }
@@ -160,6 +165,10 @@ const displayTitle = titleWithoutPrefix || title
 
   .doc-card--collect:hover .doc-card-title {
     color: #f59e0b;
+  }
+
+  .doc-card--note:hover .doc-card-title {
+    color: #059669;
   }
 
   .doc-card-description {
@@ -199,6 +208,16 @@ const displayTitle = titleWithoutPrefix || title
   .doc-card-type--collect {
     color: #b45309;
     background: rgba(245, 158, 11, 0.12);
+  }
+
+  .doc-card-type--note {
+    color: #047857;
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  :global(html[data-theme='dark']) .doc-card-type--note {
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.14);
   }
 
   :global(html[data-theme='dark']) .doc-card-type--collect {

@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "document-site",
+  "compatibility_date": "2025-06-01",
+
+  // 静态文档站：Astro 构建产物 dist/ 发布为 Workers 静态资产，
+  // Custom Domain 绑定 doc.banzheshenghuo.com（自动创建 DNS 记录与证书）。
+  // 部署：npm run deploy（= build && wrangler deploy）
+  "assets": {
+    "directory": "./dist"
+  },
+
+  "routes": [
+    { "pattern": "doc.banzheshenghuo.com", "custom_domain": true }
+  ]
+}

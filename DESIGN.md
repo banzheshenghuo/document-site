@@ -25,8 +25,8 @@
 
 - Canvas #09090B / Secondary #18181B / Text #FAFAFA / Muted #A1A1AA / Border #27272A / Signal #60A5FA / Hover #93C5FD
 
-**约束**：全站唯一强调色为 Signal Blue。卡片顶条的 read/collect 渐变（蓝 / amber-red）
-是仅有的两处语义色，只允许出现在 3px 装饰条上。禁止新增紫色、霓虹渐变、纯黑 #000000。
+**约束**：全站唯一强调色为 Signal Blue。卡片顶条的 read/collect/note 渐变（蓝 / amber-red / emerald）
+是仅有的三处语义色，只允许出现在 3px 装饰条上。禁止新增紫色、霓虹渐变、纯黑 #000000。
 
 ## 3. Typography Rules
 
@@ -47,8 +47,9 @@
   区分维度。空状态消息组合呈现激活维度（如「收藏 + 今天 筛选下暂无文章」）。
   移动端行内横向滚动，行标固定不滚。
 - **Card**：0.5rem 圆角、1px Whisper Border、3px 纯色顶条（蓝=精读 / 琥珀=收藏 /
-  灰=无类型，**不放文字**）。类型文字在 meta 行以 chip 呈现：精读=8% 蓝底蓝字、
-  收藏=12% 琥珀底琥珀字（dark 模式 #fbbf24 / 15% 琥珀底），4px 圆角 mono 0.625rem。
+  翠绿=笔记 / 灰=无类型，**不放文字**）。类型文字在 meta 行以 chip 呈现：精读=8% 蓝底蓝字、
+  收藏=12% 琥珀底琥珀字（dark 模式 #fbbf24 / 15% 琥珀底）、笔记=10% 翠绿底 #047857 字
+  （dark 模式 #34d399 / 14% 翠绿底），4px 圆角 mono 0.625rem。
   hover：-4px translateY + 边框转 25% 蓝 + 鼠标跟踪径向微光（6% 蓝）。
 - **Empty State**：居中、4rem 留白、Muted Steel 文案，明确指出该分类/筛选无内容，绝不放 "No data"。
 - **Buttons**：扁平面 + 1px 边框，active 时 -1px 视觉下压；无外发光、无自定义光标。
