@@ -16,5 +16,10 @@
 
   "routes": [
     { "pattern": "doc.banzheshenghuo.com", "custom_domain": true }
+  ],
+
+  // Worker 间直连:登录校验走 Service Binding 调 apiserver(同 zone 路由互调会 523)
+  "services": [
+    { "binding": "APISERVER", "service": "apiserver" }
   ]
 }
