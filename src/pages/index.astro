@@ -19,6 +19,7 @@ const sortedDocs = allDocs.sort((a, b) => {
 const readDocs = sortedDocs.filter(doc => doc.data.type === 'read')
 const collectDocs = sortedDocs.filter(doc => doc.data.type === 'collect')
 const noteDocs = sortedDocs.filter(doc => doc.data.type === 'note')
+const transcriptDocs = sortedDocs.filter(doc => doc.data.type === 'transcript')
 
 // 分类定义与计数（顺序来源于 site.ts 的唯一枚举）
 const categoryCounts = new Map<string, number>()
@@ -108,6 +109,12 @@ let activeType = 'all'
               data-type-filter="note"
             >
               笔记 <span class="tab-count">({noteDocs.length})</span>
+            </button>
+            <button
+              class={`tab-button ${activeType === 'transcript' ? 'active' : ''}`}
+              data-type-filter="transcript"
+            >
+              逐字稿 <span class="tab-count">({transcriptDocs.length})</span>
             </button>
           </div>
         </div>
@@ -307,7 +314,7 @@ let activeType = 'all'
         emptyState.style.display = 'block'
         const p = emptyState.querySelector('p')
         if (p) {
-          const typeNames = { read: '精读', collect: '收藏', note: '笔记' }
+          const typeNames = { read: '精读', collect: '收藏', note: '笔记', transcript: '逐字稿' }
           const timeNames = { today: '今天', '3d': '近3天', '7d': '近7天' }
           const parts = []
           if (activeType !== 'all') parts.push(typeNames[activeType])

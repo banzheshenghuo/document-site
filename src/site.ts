@@ -20,8 +20,8 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number]
 
-// 文章阅读类型（与主题分类正交：read=精读深加工，collect=原文归档，note=学习笔记）
-export const ARTICLE_TYPES = ['read', 'collect', 'note'] as const
+// 文章阅读类型（与主题分类正交：read=精读深加工，collect=原文归档，note=学习笔记，transcript=视频逐字稿）
+export const ARTICLE_TYPES = ['read', 'collect', 'note', 'transcript'] as const
 
 export type ArticleType = (typeof ARTICLE_TYPES)[number]
 

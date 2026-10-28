@@ -393,7 +393,8 @@
     }
 
     searchResults.innerHTML = results.map(doc => {
-      const basePath = document.documentElement.dataset.base || ''
+      // data-base 为 '/'(根路径部署)时须剥尾斜杠,否则拼出 '//posts/x' 被解析为协议相对地址
+      const basePath = (document.documentElement.dataset.base || '/').replace(/\/$/, '')
       const tags = (doc.tags || '').split(' ').filter(Boolean)
       const desc = doc.description || ''
       const tagsHtml = tags.length

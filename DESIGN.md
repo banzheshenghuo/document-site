@@ -25,8 +25,8 @@
 
 - Canvas #09090B / Secondary #18181B / Text #FAFAFA / Muted #A1A1AA / Border #27272A / Signal #60A5FA / Hover #93C5FD
 
-**约束**：全站唯一强调色为 Signal Blue。卡片顶条的 read/collect/note 渐变（蓝 / amber-red / emerald）
-是仅有的三处语义色，只允许出现在 3px 装饰条上。禁止新增紫色、霓虹渐变、纯黑 #000000。
+**约束**：全站唯一强调色为 Signal Blue。卡片顶条的 read/collect/note/transcript 渐变（蓝 / amber-red / emerald / cyan）
+是仅有的四处语义色，只允许出现在 3px 装饰条上。禁止新增紫色、霓虹渐变、纯黑 #000000。
 
 ## 3. Typography Rules
 
@@ -41,15 +41,16 @@
   min-height 36px（移动端 44px）。默认 border + Zinc-500 文字；hover 边框与文字
   转 Signal Blue + 6% 蓝底；active 为 Signal Blue 实底白字 +
   `0 2px 8px rgba(37,99,235,0.25)` 柔影，active 按压 -1px。计数 0.6875rem、60% 透明度。
-  三个筛选维度——**类型**（全部/精读/收藏）、**时间**（全部/今天/近3天/近7天，计数访问时
+  三个筛选维度——**类型**（全部/精读/收藏/笔记/逐字稿）、**时间**（全部/今天/近3天/近7天，计数访问时
   动态计算）、**主题**（全部分类 + 10 类）——**共用同一按钮样式**，AND 组合过滤；
   靠行首 mono 行标（0.6875rem、Muted Steel，高度等于按钮首行并垂直居中实现顶对齐）
   区分维度。空状态消息组合呈现激活维度（如「收藏 + 今天 筛选下暂无文章」）。
   移动端行内横向滚动，行标固定不滚。
 - **Card**：0.5rem 圆角、1px Whisper Border、3px 纯色顶条（蓝=精读 / 琥珀=收藏 /
-  翠绿=笔记 / 灰=无类型，**不放文字**）。类型文字在 meta 行以 chip 呈现：精读=8% 蓝底蓝字、
+  翠绿=笔记 / 青=逐字稿 / 灰=无类型，**不放文字**）。类型文字在 meta 行以 chip 呈现：精读=8% 蓝底蓝字、
   收藏=12% 琥珀底琥珀字（dark 模式 #fbbf24 / 15% 琥珀底）、笔记=10% 翠绿底 #047857 字
-  （dark 模式 #34d399 / 14% 翠绿底），4px 圆角 mono 0.625rem。
+  （dark 模式 #34d399 / 14% 翠绿底）、逐字稿=10% 青底 #0e7490 字（dark 模式 #22d3ee / 15% 青底），
+  4px 圆角 mono 0.625rem。
   hover：-4px translateY + 边框转 25% 蓝 + 鼠标跟踪径向微光（6% 蓝）。
 - **Empty State**：居中、4rem 留白、Muted Steel 文案，明确指出该分类/筛选无内容，绝不放 "No data"。
 - **Buttons**：扁平面 + 1px 边框，active 时 -1px 视觉下压；无外发光、无自定义光标。
