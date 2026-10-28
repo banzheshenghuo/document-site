@@ -1,13 +1,14 @@
 ---
 import { SITE } from '../site'
 
-// 使用 base URL 构建正确的首页链接
+// 使用 base URL 构建正确的首页链接(根路径部署时剥尾斜杠会得空串,首页链接需回退 '/')
 const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+const homeHref = basePath || '/'
 ---
 
 <header class="header" id="site-header">
   <div class="header-container">
-    <a href={basePath} class="logo">
+    <a href={homeHref} class="logo">
       <span class="status-dot" aria-hidden="true"></span>
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="32" height="32" rx="8" fill="url(#logo-gradient)"/>
@@ -23,7 +24,7 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     </a>
 
     <nav class="nav">
-      <a href={basePath}>首页</a>
+      <a href={homeHref}>首页</a>
       <button class="theme-toggle" aria-label="切换主题">
         <svg class="sun-icon" width="18" height="18" viewBox="0 0 20 20" fill="none">
           <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="2"/>
