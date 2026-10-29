@@ -65,6 +65,8 @@
 }
 
 .doc-content :global(img) {
+  max-width: 100%;
+  height: auto;
   border-radius: 0.5rem;
   margin: 1.5rem 0;
 }
