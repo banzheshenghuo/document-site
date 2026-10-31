@@ -141,6 +141,73 @@ const dateStr = doc.data.date
   }
 </script>
 
+<script>
+  import mediumZoom from 'medium-zoom'
+
+  function setupImageZoom() {
+    const root = document.querySelector('.doc-content')
+    if (!root) return
+
+    const isIcon = (img: HTMLImageElement) => img.width > 0 && img.width < 120
+
+    const collect = (): HTMLImageElement[] => {
+      return Array.from(root.querySelectorAll('img')).filter((img) => {
+        if (img.dataset.noZoom !== undefined) return false
+        if (img.closest('pre, code')) return false
+        // 图标类小图不参与放大
+        return !isIcon(img)
+      })
+    }
+
+    const bindLinkGuard = (images: HTMLImageElement[]) => {
+      // 图片若被链接包裹，点击时改为放大而不是跳转
+      images.forEach((img) => {
+        const link = img.closest('a')
+        if (link && !link.dataset.zoomGuard) {
+          link.dataset.zoomGuard = '1'
+          link.addEventListener('click', (event) => {
+            if (!event.target || event.target === img) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+          })
+        }
+      })
+    }
+
+    if (collect().length === 0) return
+
+    const zoom = mediumZoom({ background: 'rgba(9, 9, 11, 0.92)', margin: 24, scrollOffset: 60 })
+
+    const sync = () => {
+      const images = collect()
+      if (images.length === 0) return
+      bindLinkGuard(images)
+      // attach 幂等：已挂载的会去重，只处理新增图片
+      zoom.attach(images)
+    }
+
+    sync()
+
+    // 懒加载图片在加载完成后才拿得到尺寸：此时才能识别并摘除小图标
+    root.addEventListener('load', (event) => {
+      const img = event.target
+      if (!(img instanceof HTMLImageElement) || !img.classList.contains('medium-zoom-image')) return
+      if (isIcon(img)) zoom.detach(img)
+    }, true)
+
+    // 兜底：首屏外图片加载较晚，分批重扫补齐
+    const rescans = [400, 1200, 2500, 5000]
+    rescans.forEach((delay) => setTimeout(sync, delay))
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupImageZoom, { once: true })
+  } else {
+    setupImageZoom()
+  }
+</script>
+
 <style>
   .doc-page {
     margin-top: 1rem;
@@ -365,8 +432,7 @@ const dateStr = doc.data.date
     background: rgba(37, 99, 235, 0.06);
   }
 
-  /* ===== 回到顶部 ===== */
-  .back-to-top {
+  /* ===== 回到顶部 ===== */  .back-to-top {
     position: fixed;
     bottom: 2rem;
     right: 2rem;

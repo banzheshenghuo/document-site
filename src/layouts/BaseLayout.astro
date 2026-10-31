@@ -220,6 +220,23 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     border-radius: 0.5rem;
   }
 
+  /* ===== 图片放大（medium-zoom） ===== */
+  /* 覆盖层需置于固定头部(100)、搜索框(200)、回到顶部(1000)之上 */
+  .medium-zoom-overlay {
+    z-index: 1001;
+    background: rgba(9, 9, 11, 0.92) !important;
+  }
+
+  .medium-zoom-image--opened {
+    z-index: 1002;
+    border-radius: 6px !important;
+    background: #fff;
+  }
+
+  .doc-content img.medium-zoom-image {
+    cursor: zoom-in;
+  }
+
   /* 修复代码块溢出问题 */
   code {
     font-family: var(--font-mono);
