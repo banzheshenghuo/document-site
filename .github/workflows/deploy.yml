@@ -1,11 +1,9 @@
-# 构建静态站点并发布到公开产物仓库 banzheshenghuo/document-site-pages（GitHub Pages）
+# 构建并部署到 GitHub Pages（本仓库直接部署，Actions 模式）
 #
-# 认证：源码仓库保持私有，用仅授予该产物仓库写权限的 SSH deploy key 推送构建产物。
-# 密钥：仓库 Secret `PAGES_DEPLOY_KEY`（私钥），公钥配置为 document-site-pages 的
-#       Deploy key（勾选 Allow write access）。更换密钥只需重建这两处。
-# 域名：peaceiris 的 cname 参数会在产物分支写入 CNAME 文件，GitHub Pages 据此绑定
-#       doc.banzheshenghuo.com；DNS 需将 doc 记录 CNAME 到 banzheshenghuo.github.io。
-# force_orphan: 每次部署都是单 commit 的全新分支历史，避免 180MB+ 产物无限膨胀。
+# 触发：push 到 main 自动部署；Actions 页面可手动 Run workflow。
+# 依赖：仓库需公开（或账号为付费计划），Settings → Pages → Source = GitHub Actions，
+#       自定义域名 doc.banzheshenghuo.com 已通过 API 配置在 Pages 设置中。
+# DNS：doc 记录 CNAME 至 banzhenghuo.github.io（仅 DNS，不开代理）。
 name: Deploy to GitHub Pages
 
 on:
@@ -15,13 +13,15 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: pages-deploy
+  group: pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,15 +39,18 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to document-site-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          deploy_key: ${{ secrets.PAGES_DEPLOY_KEY }}
-          external_repository: banzheshenghuo/document-site-pages
-          publish_branch: gh-pages
-          publish_dir: ./dist
-          force_orphan: true
-          cname: doc.banzheshenghuo.com
-          user_name: github-actions[bot]
-          user_email: github-actions[bot]@users.noreply.github.com
-          commit_message: 'Deploy ${{ github.sha }}: ${{ github.event.head_commit.message }}'
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

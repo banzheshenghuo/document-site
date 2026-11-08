@@ -56,11 +56,11 @@ graph TD
 
 ## 部署到 GitHub Pages
 
-源码仓库 `banzheshenghuo/document-site` 保持私有，构建产物由 GitHub Actions 发布到公开仓库 `banzheshenghuo/document-site-pages`，通过自定义域名 `doc.banzheshenghuo.com` 访问。
+仓库公开，直接从本仓库部署到 GitHub Pages，访问地址 `doc.banzheshenghuo.com`。
 
-1. 推送到 `main` 分支自动触发 `.github/workflows/deploy.yml`：构建后用 deploy key 把 `dist/` 推送到产物仓库的 `gh-pages` 分支（单 commit 历史，`force_orphan`）
-2. 产物仓库在 Settings → Pages 中以 `gh-pages` 分支为源启用 Pages
-3. DNS 中将 `doc` 记录 CNAME 到 `banzheshenghuo.github.io`（仅 DNS，不开代理），域名由产物分支中的 CNAME 文件绑定
+1. 推送到 `main` 分支自动触发 `.github/workflows/deploy.yml`（构建后经 `actions/deploy-pages` 发布）；也可在 Actions 页面手动 Run workflow
+2. Pages 源为 **GitHub Actions** 模式，自定义域名配置在仓库 Settings → Pages
+3. DNS 中将 `doc` 记录 CNAME 到 `banzheshenghuo.github.io`（仅 DNS，不开代理），否则 GitHub 无法签发证书
 4. `astro.config.mjs` 中 `site` 保持为自定义域名（sitemap/RSS 的 canonical 地址依赖它）；使用 `*.github.io` 子路径时才需要额外配置 `base`
 
 ## 目录结构
