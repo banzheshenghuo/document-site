@@ -60,6 +60,12 @@ const dateStr = doc.data.date
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <span>{readingTime} 分钟阅读</span>
           </div>
+          {doc.data.ima_url && (
+            <a class="meta-item meta-link" href={doc.data.ima_url} target="_blank" rel="noopener" title="在 ima 中查看原文归档">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <span>ima 原文归档</span>
+            </a>
+          )}
           {doc.data.tags && doc.data.tags.length > 0 && (
             <div class="doc-tags">
               {doc.data.tags.map(tag => (
@@ -305,6 +311,16 @@ const dateStr = doc.data.date
 
   .meta-item svg {
     opacity: 0.6;
+  }
+
+  a.meta-link {
+    text-decoration: none;
+    transition: color 0.2s, opacity 0.2s;
+  }
+
+  a.meta-link:hover {
+    color: var(--color-primary);
+    opacity: 1;
   }
 
   .doc-tags {
