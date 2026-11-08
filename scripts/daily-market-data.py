@@ -47,11 +47,19 @@ def a_indices():
 def hk_indices():
     import akshare as ak
     df = ak.stock_hk_index_spot_em()
-    sub = df[df["名称"].str.contains("恒生指数|恒生科技", na=False)][["名称", "最新价", "涨跌幅"]]
+    sub = df[df["名称"] == "恒生指数"][["名称", "最新价", "涨跌幅"]]
     ROW("| 指数 | 收盘 | 涨跌幅 |")
     ROW("|---|---|---|")
     for _, r in sub.iterrows():
         ROW(f"| {r['名称']} | {r['最新价']} | {r['涨跌幅']}% |")
+    # 恒生科技现货不在 spot 列表，用日行情接口
+    try:
+        tech = ak.stock_hk_index_daily_em(symbol="HSTECH")
+        r, prev = tech.iloc[-1], tech.iloc[-2]
+        pct = (float(r["close"]) - float(prev["close"])) / float(prev["close"]) * 100
+        ROW(f"| 恒生科技 | {r['close']} | {pct:+.2f}% |")
+    except Exception as e:
+        print(f"[warn] 恒生科技: {e}", file=sys.stderr)
 
 @safe("美股指数")
 def us_indices():
