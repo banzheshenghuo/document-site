@@ -56,8 +56,8 @@ def hk_indices():
     try:
         tech = ak.stock_hk_index_daily_em(symbol="HSTECH")
         r, prev = tech.iloc[-1], tech.iloc[-2]
-        pct = (float(r["close"]) - float(prev["close"])) / float(prev["close"]) * 100
-        ROW(f"| 恒生科技 | {r['close']} | {pct:+.2f}% |")
+        pct = (float(r["latest"]) - float(prev["latest"])) / float(prev["latest"]) * 100
+        ROW(f"| 恒生科技 | {r['latest']} | {pct:+.2f}% |")
     except Exception as e:
         print(f"[warn] 恒生科技: {e}", file=sys.stderr)
 
