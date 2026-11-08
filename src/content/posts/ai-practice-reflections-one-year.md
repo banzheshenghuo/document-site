@@ -4,6 +4,7 @@ date: 2026-04-10
 description: 从Prompt Engineering到Harness Engineering,深度解析AI时代的工具链、方法论和个人思考
 tags: [AI工具, Claude Code, Harness Engineering, Context Engineering, Skill体系]
 category: AI与Agent
+type: read
 image: /images/ai-tools-reflection.jpg
 ---
 

@@ -6,7 +6,7 @@ export interface Props {
   date?: string
   tags?: string[]
   category?: string
-  type?: 'read' | 'collect' | 'note' | 'transcript'
+  type?: 'read' | 'daily-finance'
   'data-tags'?: string
 }
 
@@ -30,12 +30,10 @@ function getPrefix(title: string) {
 }
 
 // 获取前缀类型
-function getPrefixType(prefix: string | null): 'read' | 'collect' | 'note' | 'transcript' | null {
+function getPrefixType(prefix: string | null): 'read' | 'daily-finance' | null {
   if (!prefix) return null
   if (prefix === '精读' || prefix === '解读' || prefix === '深度') return 'read'
-  if (prefix === '收藏' || prefix === '归档' || prefix === '书签') return 'collect'
-  if (prefix === '笔记' || prefix === '学习') return 'note'
-  if (prefix === '逐字稿') return 'transcript'
+  if (prefix === '金融日报' || prefix === '日报' || prefix === '市场观察') return 'daily-finance'
   return null
 }
 
@@ -52,7 +50,7 @@ function formatDate(dateStr: string): string {
 const { prefix, titleWithoutPrefix } = getPrefix(title)
 // 显式 type 字段优先，标题前缀解析仅作历史文章兜底
 const articleType = type || getPrefixType(prefix)
-const typeLabel = prefix || (articleType === 'read' ? '精读' : articleType === 'collect' ? '收藏' : articleType === 'note' ? '笔记' : articleType === 'transcript' ? '逐字稿' : null)
+const typeLabel = prefix || (articleType === 'read' ? '精读' : articleType === 'daily-finance' ? '金融日报' : null)
 const displayTitle = titleWithoutPrefix || title
 ---
 <article class={`doc-card ${articleType ? `doc-card--${articleType}` : ''}`} data-tags={dataTags || JSON.stringify(tags)} data-date={date || ''} data-category={category || ''} data-type={articleType || ''}>
@@ -70,7 +68,7 @@ const displayTitle = titleWithoutPrefix || title
         {date && <time class="doc-card-date">{formatDate(date)}</time>}
         {tags.length > 0 && (
           <div class="doc-card-tags">
-            {tags.filter(t => !['精读','解读','深度','收藏','归档','书签','笔记','学习','逐字稿'].includes(t)).slice(0, 3).map(tag => (
+            {tags.filter(t => !['精读','解读','深度','金融日报','日报','市场观察'].includes(t)).slice(0, 3).map(tag => (
               <span class="doc-card-tag">{tag}</span>
             ))}
           </div>
@@ -126,16 +124,8 @@ const displayTitle = titleWithoutPrefix || title
     background: linear-gradient(90deg, #2563EB, #3B82F6);
   }
 
-  .doc-card-bar--collect {
-    background: linear-gradient(90deg, #f59e0b, #ef4444);
-  }
-
-  .doc-card-bar--note {
-    background: linear-gradient(90deg, #10b981, #059669);
-  }
-
-  .doc-card-bar--transcript {
-    background: linear-gradient(90deg, #06b6d4, #0891b2);
+  .doc-card-bar--daily-finance {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
   }
 
   .doc-card-bar--default {
@@ -168,16 +158,8 @@ const displayTitle = titleWithoutPrefix || title
     color: #2563EB;
   }
 
-  .doc-card--collect:hover .doc-card-title {
-    color: #f59e0b;
-  }
-
-  .doc-card--note:hover .doc-card-title {
-    color: #059669;
-  }
-
-  .doc-card--transcript:hover .doc-card-title {
-    color: #0891b2;
+  .doc-card--daily-finance:hover .doc-card-title {
+    color: #d97706;
   }
 
   .doc-card-description {
@@ -214,34 +196,14 @@ const displayTitle = titleWithoutPrefix || title
     background: rgba(37, 99, 235, 0.08);
   }
 
-  .doc-card-type--collect {
+  .doc-card-type--daily-finance {
     color: #b45309;
     background: rgba(245, 158, 11, 0.12);
   }
 
-  .doc-card-type--note {
-    color: #047857;
-    background: rgba(16, 185, 129, 0.1);
-  }
-
-  .doc-card-type--transcript {
-    color: #0e7490;
-    background: rgba(6, 182, 212, 0.1);
-  }
-
-  :global(html[data-theme='dark']) .doc-card-type--note {
-    color: #34d399;
-    background: rgba(16, 185, 129, 0.14);
-  }
-
-  :global(html[data-theme='dark']) .doc-card-type--collect {
+  :global(html[data-theme='dark']) .doc-card-type--daily-finance {
     color: #fbbf24;
     background: rgba(245, 158, 11, 0.15);
-  }
-
-  :global(html[data-theme='dark']) .doc-card-type--transcript {
-    color: #22d3ee;
-    background: rgba(6, 182, 212, 0.15);
   }
 
   .doc-card-date {

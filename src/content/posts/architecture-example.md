@@ -1,5 +1,6 @@
 ---
 category: 技术
+type: read
 title: '技术架构设计示例'
 description: '一个典型的 Web 应用架构设计示例，展示前后端分离、微服务架构等常见架构模式。'
 date: '2026-03-27'

@@ -4,6 +4,7 @@ date: 2026-04-10
 description: 值得深度阅读的文章收藏夹
 tags: [收藏, 书签]
 category: 其他
+type: read
 ---
 
 # 文章收藏

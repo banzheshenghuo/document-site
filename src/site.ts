@@ -8,20 +8,17 @@ export const SITE = {
 export const CATEGORIES = [
   'AI与Agent',
   '技术',
-  '开源库与工具',
   '金融',
   '认知迭代',
-  '知识管理',
   '职业发展',
-  '心理学',
-  '生活',
   '其他',
 ] as const
 
 export type Category = (typeof CATEGORIES)[number]
 
-// 文章阅读类型（与主题分类正交：read=精读深加工，collect=原文归档，note=学习笔记，transcript=视频逐字稿）
-export const ARTICLE_TYPES = ['read', 'collect', 'note', 'transcript'] as const
+// 文章类型（与主题分类正交：read=精读解读，daily-finance=每日金融日报）。
+// 原文全文（逐字稿/收藏）不上站，统一归档到 ima 知识库。
+export const ARTICLE_TYPES = ['read', 'daily-finance'] as const
 
 export type ArticleType = (typeof ARTICLE_TYPES)[number]
 
