@@ -26,6 +26,17 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     <link rel="icon" type="image/svg+xml" href={`${basePath}/favicon.svg`} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <script is:inline>
+      // 主题预置：必须在首帧绘制前同步执行，否则暗色用户会先看到亮色闪一下（FOUC）
+      ;(function () {
+        var theme = null
+        try { theme = localStorage.getItem('theme') } catch (e) {}
+        if (theme !== 'dark' && theme !== 'light') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.dataset.theme = theme
+      })()
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -40,20 +51,7 @@ const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     </div>
 
     <script>
-      // 深色模式切换
-      const theme = (() => {
-        if (typeof localStorage !== 'undefined') {
-          const saved = localStorage.getItem('theme')
-          if (saved) return saved
-        }
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          return 'dark'
-        }
-        return 'light'
-      })()
-
-      document.documentElement.dataset.theme = theme
-
+      // 深色模式切换（初始主题已在 <head> 内联脚本中于首帧前设置，避免闪烁）
       document.querySelectorAll('.theme-toggle').forEach(btn => {
         btn.addEventListener('click', () => {
           const newTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
