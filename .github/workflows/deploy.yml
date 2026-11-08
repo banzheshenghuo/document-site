@@ -1,0 +1,53 @@
+# 构建静态站点并发布到公开产物仓库 banzheshenghuo/document-site-pages（GitHub Pages）
+#
+# 认证：源码仓库保持私有，用仅授予该产物仓库写权限的 SSH deploy key 推送构建产物。
+# 密钥：仓库 Secret `PAGES_DEPLOY_KEY`（私钥），公钥配置为 document-site-pages 的
+#       Deploy key（勾选 Allow write access）。更换密钥只需重建这两处。
+# 域名：peaceiris 的 cname 参数会在产物分支写入 CNAME 文件，GitHub Pages 据此绑定
+#       doc.banzheshenghuo.com；DNS 需将 doc 记录 CNAME 到 banzheshenghuo.github.io。
+# force_orphan: 每次部署都是单 commit 的全新分支历史，避免 180MB+ 产物无限膨胀。
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to document-site-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.PAGES_DEPLOY_KEY }}
+          external_repository: banzheshenghuo/document-site-pages
+          publish_branch: gh-pages
+          publish_dir: ./dist
+          force_orphan: true
+          cname: doc.banzheshenghuo.com
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          commit_message: 'Deploy ${{ github.sha }}: ${{ github.event.head_commit.message }}'
