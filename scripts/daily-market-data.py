@@ -1,15 +1,28 @@
 #!/usr/bin/env python3
 """daily-market-data.py — 金融日报取数脚本（akshare）
-输出 Markdown 片段（各板块表格），供每日 07:00 金融日报任务直接引用。
+除当日数据外，附周期对比：指数近5日累计、成交额 vs 5日均量、板块5日累计与连续天数、
+南向资金当日+近5日累计、汇率/金/油周变动。
 任一数据块失败输出『数据暂缺』，绝不中断整个脚本。
 用法: python3 scripts/daily-market-data.py [--out /tmp/market-data.md]
 """
-import sys, argparse, traceback
+import sys, argparse
 from datetime import datetime, timedelta
 
 OUT_LINES = []
 SEC = lambda t: OUT_LINES.append(f"\n### {t}\n")
 ROW = lambda s: OUT_LINES.append(s)
+
+def pct(a, b):
+    return (float(a) - float(b)) / float(b) * 100 if b else 0.0
+
+def cum5(closes):
+    """近5个交易日累计涨跌幅（复利）"""
+    if not closes or len(closes) < 6:
+        return None
+    return (float(closes[-1]) / float(closes[-6]) - 1) * 100
+
+def start_date(days=15):
+    return (datetime.now() - timedelta(days=days)).strftime("%Y%m%d")
 
 def safe(name):
     """装饰器：单块数据失败只记录，不中断"""
@@ -24,65 +37,75 @@ def safe(name):
         return wrap
     return deco
 
-def prev_trading_day_hint():
-    today = datetime.now()
-    d = today - timedelta(days=1)
-    while d.weekday() >= 5:  # 跳过周末，具体节假日无法本地判断
-        d -= timedelta(days=1)
-    return d.strftime("%Y-%m-%d")
-
 @safe("A股主要指数")
 def a_indices():
     import akshare as ak
-    df = ak.stock_zh_index_spot_em(symbol="沪深重要指数")
-    want = ["上证指数", "深证成指", "创业板指", "科创50"]
-    sub = df[df["名称"].isin(want)][["名称", "最新价", "涨跌幅", "成交额"]]
-    ROW("| 指数 | 收盘 | 涨跌幅 | 成交额 |")
-    ROW("|---|---|---|---|")
-    for _, r in sub.iterrows():
-        amt = float(r["成交额"]) / 1e8 if r["成交额"] else 0
-        ROW(f"| {r['名称']} | {r['最新价']} | {r['涨跌幅']}% | {amt:.0f}亿 |")
+    codes = [("000001", "上证指数"), ("399001", "深证成指"), ("399006", "创业板指"), ("000688", "科创50")]
+    ROW("| 指数 | 收盘 | 当日 | 近5日累计 | 成交额(vs 5日均) |")
+    ROW("|---|---|---|---|---|")
+    for code, name in codes:
+        d = ak.index_zh_a_hist(symbol=code, period="daily", start_date=start_date(),
+                               end_date=datetime.now().strftime("%Y%m%d"))
+        if len(d) < 6:
+            ROW(f"| {name} | 数据暂缺 | — | — | — |")
+            continue
+        last = d.iloc[-1]
+        amt = float(last["成交额"]) / 1e8
+        avg5 = d["成交额"].iloc[-6:-1].astype(float).mean() / 1e8
+        c5 = cum5(d["收盘"].tolist())
+        ROW(f"| {name} | {last['收盘']} | {float(last['涨跌幅']):+.2f}% | "
+            f"{c5:+.2f}% | {amt:.0f}亿 / 均{avg5:.0f}亿 |")
 
 @safe("港股指数")
 def hk_indices():
     import akshare as ak
-    df = ak.stock_hk_index_spot_em()
-    sub = df[df["名称"] == "恒生指数"][["名称", "最新价", "涨跌幅"]]
-    ROW("| 指数 | 收盘 | 涨跌幅 |")
-    ROW("|---|---|---|")
-    for _, r in sub.iterrows():
-        ROW(f"| {r['名称']} | {r['最新价']} | {r['涨跌幅']}% |")
-    # 恒生科技现货不在 spot 列表，用日行情接口
-    try:
-        tech = ak.stock_hk_index_daily_em(symbol="HSTECH")
-        r, prev = tech.iloc[-1], tech.iloc[-2]
-        pct = (float(r["latest"]) - float(prev["latest"])) / float(prev["latest"]) * 100
-        ROW(f"| 恒生科技 | {r['latest']} | {pct:+.2f}% |")
-    except Exception as e:
-        print(f"[warn] 恒生科技: {e}", file=sys.stderr)
+    ROW("| 指数 | 收盘 | 当日 | 近5日累计 |")
+    ROW("|---|---|---|---|")
+    for sym, name in [("HSI", "恒生指数"), ("HSTECH", "恒生科技")]:
+        d = ak.stock_hk_index_daily_em(symbol=sym)
+        closes = d["latest"].astype(float).tolist()
+        ROW(f"| {name} | {closes[-1]:.2f} | {pct(closes[-1], closes[-2]):+.2f}% | {cum5(closes):+.2f}% |")
 
-@safe("美股指数")
+@safe("美股指数（前一交易日收盘）")
 def us_indices():
     import akshare as ak
-    df = ak.index_us_stock_sina(symbol=".INX")  # 先拉标普确认接口可用
-    ROW("| 指数 | 最新 | 涨跌幅 |")
-    ROW("|---|---|---|")
-    for sym, label in [(".DJI", "道琼斯"), (".INX", "标普500"), (".IXIC", "纳斯达克")]:
-        d2 = ak.index_us_stock_sina(symbol=sym)
-        r = d2.iloc[-1]
-        prev = d2.iloc[-2]["close"] if len(d2) > 1 else 0
-        pct = (float(r["close"]) - float(prev)) / float(prev) * 100 if prev else 0
-        ROW(f"| {label} | {r['close']} | {pct:+.2f}% |")
+    ROW("| 指数 | 收盘 | 当日 | 近5日累计 |")
+    ROW("|---|---|---|---|")
+    for sym, name in [(".DJI", "道琼斯"), (".INX", "标普500"), (".IXIC", "纳斯达克")]:
+        d = ak.index_us_stock_sina(symbol=sym)
+        closes = d["close"].astype(float).tolist()
+        ROW(f"| {name} | {closes[-1]:.2f} | {pct(closes[-1], closes[-2]):+.2f}% | {cum5(closes):+.2f}% |")
 
-@safe("行业板块涨跌")
+@safe("行业板块涨跌（含5日累计与连续天数）")
 def boards():
     import akshare as ak
-    df = ak.stock_board_industry_name_em()
-    df = df.sort_values("涨跌幅", ascending=False)
+    df = ak.stock_board_industry_name_em().sort_values("涨跌幅", ascending=False)
+
+    def enrich(name, day):
+        try:
+            h = ak.stock_board_industry_hist_em(symbol=name, start_date=start_date(),
+                                                end_date=datetime.now().strftime("%Y%m%d"),
+                                                period="日k", adjust="")
+            ch = h["涨跌幅"].astype(float).tolist()
+            v = 1.0
+            for r in ch[-5:]:
+                v *= (1 + r / 100)
+            c5 = (v - 1) * 100
+            streak = 0
+            for r in reversed(ch):
+                if (day >= 0 and r > 0) or (day < 0 and r < 0):
+                    streak += 1
+                else:
+                    break
+            tag = f"连涨{streak}日" if day >= 0 else f"连跌{streak}日"
+            return f"{name}({day:+.2f}%, 5日{c5:+.1f}%, {tag})"
+        except Exception:
+            return f"{name}({day:+.2f}%)"
+
     ROW("**领涨板块**：")
-    ROW(", ".join(f"{r['板块名称']}({r['涨跌幅']:+.2f}%)" for _, r in df.head(5).iterrows()))
+    ROW(", ".join(enrich(r["板块名称"], float(r["涨跌幅"])) for _, r in df.head(5).iterrows()))
     ROW("\n**领跌板块**：")
-    ROW(", ".join(f"{r['板块名称']}({r['涨跌幅']:+.2f}%)" for _, r in df.tail(5).iloc[::-1].iterrows()))
+    ROW(", ".join(enrich(r["板块名称"], float(r["涨跌幅"])) for _, r in df.tail(5).iloc[::-1].iterrows()))
 
 @safe("个股涨跌与成交")
 def stocks():
@@ -98,38 +121,58 @@ def stocks():
     ROW("\n**跌幅居前**：" + ", ".join(f"{r['名称']}({r['涨跌幅']:+.2f}%)" for _, r in bot.iterrows()))
     ROW("\n**成交额居前**：" + ", ".join(f"{r['名称']}({float(r['成交额'])/1e8:.0f}亿)" for _, r in vol.iterrows()))
 
-@safe("北向资金")
-def north():
+@safe("南向资金（当日+近5日累计）")
+def flows():
     import akshare as ak
-    df = ak.stock_hsgt_fund_flow_summary_em()
-    ROW(df.head(4).to_string(index=False))
+    ROW("| 通道 | 当日净买额 | 近5日累计 |")
+    ROW("|---|---|---|")
+    tot5, last_date = 0.0, ""
+    for sym, label in [("港股通沪", "港股通(沪)"), ("港股通深", "港股通(深)")]:
+        d = ak.stock_hsgt_hist_em(symbol=sym)
+        d["日期"] = d["日期"].astype(str).str[:10]
+        pairs = [(dt, v) for dt, v in zip(d["日期"].tolist(), d["当日成交净买额"].tolist())
+                 if v == v]  # 剔除 NaN（官方停披等）
+        vals = [v for _, v in pairs]
+        last_date = pairs[-1][0]
+        c5 = sum(vals[-5:])
+        tot5 += c5
+        ROW(f"| {label} | {vals[-1]:+.2f}亿 | {c5:+.2f}亿 |")
+    ROW(f"| **合计** | — | **{tot5:+.2f}亿** |")
+    ROW(f"\n(最新数据日: {last_date}；北向资金官方自 2024 年起停止披露每日净买额)")
 
-@safe("汇率与商品")
+@safe("汇率与商品（含近5日变动）")
 def fx():
     import akshare as ak
-    from datetime import datetime, timedelta
     end = datetime.now().strftime("%Y%m%d")
-    start = (datetime.now() - timedelta(days=10)).strftime("%Y%m%d")
-    # 美元人民币（中国银行牌价）
+
+    def wk(series):
+        s = [x for x in series if x == x]
+        return pct(s[-1], s[-6]) if len(s) >= 6 else None
+
     try:
-        d = ak.currency_boc_sina(symbol="美元", start_date=start, end_date=end)
+        d = ak.currency_boc_sina(symbol="美元", start_date=start_date(20), end_date=end)
         r = d.iloc[-1]
-        mid = r["央行中间价"] if r.get("央行中间价") not in (None, "NaN") and str(r.get("央行中间价", "")) != "nan" else r["中行折算价"]
-        ROW(f"- 美元/人民币: {float(mid)/100:.4f}（{r['日期']}，中行牌价）")
+        mid = r["央行中间价"] if str(r.get("央行中间价", "")) != "nan" and r.get("央行中间价") is not None else r["中行折算价"]
+        w = wk(([float(x) if str(x) != "nan" else float("nan") for x in d["央行中间价"]])
+               if str(r.get("央行中间价", "")) != "nan" else [float(x) for x in d["中行折算价"]])
+        wtxt = f"({w:+.2f}%)" if w is not None else ""
+        ROW(f"- 美元/人民币: {float(mid)/100:.4f} {wtxt}（{r['日期']}，中行牌价，近5日）")
     except Exception as e:
         ROW(f"- 美元/人民币: 数据暂缺（{type(e).__name__}）")
-    # 黄金（上海金交所）
     try:
         g = ak.spot_hist_sge(symbol="Au99.99")
-        r = g.iloc[-1]
-        ROW(f"- 上海金 Au99.99: {r['close']} 元/克（{r['date']}）")
+        closes = g["close"].astype(float).tolist()
+        w = wk(closes)
+        wtxt = f"，近5日 {w:+.2f}%" if w is not None else ""
+        ROW(f"- 上海金 Au99.99: {closes[-1]} 元/克{wtxt}（{str(g['date'].iloc[-1])[:10]}）")
     except Exception as e:
         ROW(f"- 黄金: 数据暂缺（{type(e).__name__}）")
-    # 原油
     try:
-        o = ak.futures_foreign_hist(symbol="CL")  # NYMEX WTI 主力
-        r = o.iloc[-1]
-        ROW(f"- WTI 原油期货: {r['close']} 美元/桶（{r['date']}）")
+        o = ak.futures_foreign_hist(symbol="CL")
+        closes = o["close"].astype(float).tolist()
+        w = wk(closes)
+        wtxt = f"，近5日 {w:+.2f}%" if w is not None else ""
+        ROW(f"- WTI 原油期货: {closes[-1]} 美元/桶{wtxt}（{str(o['date'].iloc[-1])[:10]}）")
     except Exception as e:
         ROW(f"- 原油: 数据暂缺（{type(e).__name__}）")
 
@@ -137,8 +180,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="/tmp/market-data.md")
     args = ap.parse_args()
-    ROW(f"<!-- 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 数据接口: akshare(东方财富等) -->")
-    a_indices(); hk_indices(); us_indices(); boards(); stocks(); north(); fx()
+    ROW(f"<!-- 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 数据接口: akshare(东方财富等) | "
+        f"周期口径: 近5日=最近5个交易日(复利累计)；⚠️ A股交易时段内运行时当日数据为盘中值 -->")
+    a_indices(); hk_indices(); us_indices(); boards(); stocks(); flows(); fx()
     text = "\n".join(OUT_LINES)
     with open(args.out, "w", encoding="utf-8") as f:
         f.write(text)
