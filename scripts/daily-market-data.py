@@ -140,6 +140,39 @@ def flows():
     ROW(f"| **合计** | — | **{tot5:+.2f}亿** |")
     ROW(f"\n(最新数据日: {last_date}；北向资金官方自 2024 年起停止披露每日净买额)")
 
+@safe("债基跟踪")
+def bond_funds():
+    import akshare as ak
+    FUND_CODES = [
+        ("006961", "南方中债7-10年国开A"),
+        ("001235", "中银国有企业债A"),
+        ("018192", "建信鑫弘180天持有A"),
+        ("019204", "鹏华丰康债券C"),
+    ]
+    ROW("| 基金 | 最新净值 | 当日 | 近5日 | 近1月 | 今年以来 |")
+    ROW("|---|---|---|---|---|---|")
+    for code, name in FUND_CODES:
+        try:
+            d = ak.fund_open_fund_info_em(symbol=code, indicator="单位净值走势")
+            d["净值日期"] = d["净值日期"].astype(str).str[:10]
+            nav = d["单位净值"].astype(float).tolist()
+            dates = d["净值日期"].tolist()
+            last_date = dates[-1]
+
+            def rng(n):
+                return (nav[-1] / nav[-1 - n] - 1) * 100 if len(nav) > n else None
+
+            year_now = last_date[:4]
+            prev = [i for i, dt in enumerate(dates) if dt[:4] != year_now]
+            ytd = (nav[-1] / nav[prev[-1]] - 1) * 100 if prev else None
+            day = float(d["日增长率"].iloc[-1]) if str(d["日增长率"].iloc[-1]) != "nan" else None
+            fmt = lambda v: f"{v:+.2f}%" if v is not None else "—"
+            ROW(f"| {name}({code}) | {nav[-1]:.4f}（{last_date}） | {fmt(day)} | "
+                f"{fmt(rng(5))} | {fmt(rng(22))} | {fmt(ytd)} |")
+        except Exception as e:
+            ROW(f"| {name}({code}) | 数据暂缺（{type(e).__name__}） | — | — | — | — |")
+    ROW("\n(债基净值晚间陆续更新；当日列非最新交易日时为尚未披露，以最新可得为准)")
+
 @safe("汇率与商品（含近5日变动）")
 def fx():
     import akshare as ak
@@ -182,7 +215,7 @@ def main():
     args = ap.parse_args()
     ROW(f"<!-- 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 数据接口: akshare(东方财富等) | "
         f"周期口径: 近5日=最近5个交易日(复利累计)；⚠️ A股交易时段内运行时当日数据为盘中值 -->")
-    a_indices(); hk_indices(); us_indices(); boards(); stocks(); flows(); fx()
+    a_indices(); hk_indices(); us_indices(); boards(); stocks(); flows(); bond_funds(); fx()
     text = "\n".join(OUT_LINES)
     with open(args.out, "w", encoding="utf-8") as f:
         f.write(text)
