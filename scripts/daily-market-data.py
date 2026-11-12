@@ -88,7 +88,7 @@ def hk_indices():
     ROW("| 指数 | 收盘 | 当日 | 近5日累计 |")
     ROW("|---|---|---|---|")
     for sym, name in [("HSI", "恒生指数"), ("HSTECH", "恒生科技")]:
-        closes = None
+        closes, day_chg = None, None
         try:
             d = ak.stock_hk_index_daily_em(symbol=sym)
             closes = d["latest"].astype(float).tolist()
@@ -96,9 +96,16 @@ def hk_indices():
             try:
                 d = ak.stock_hk_index_daily_sina(symbol=sym)
                 closes = d["close"].astype(float).tolist()
+                # 新浪日线 T+1 才更新，若最新日不是今天则用 spot 补当日
+                d["date"] = d["date"].astype(str).str[:10]
+                if d["date"].iloc[-1] != datetime.now().strftime("%Y-%m-%d"):
+                    spot = ak.stock_hk_index_spot_sina()
+                    row = spot[spot["代码"] == sym]
+                    if len(row):
+                        closes = closes + [float(row.iloc[0]["最新价"])]
             except Exception:
                 pass
-        if closes:
+        if closes and len(closes) >= 2:
             ROW(f"| {name} | {closes[-1]:.2f} | {pct(closes[-1], closes[-2]):+.2f}% | {cum5(closes):+.2f}% |")
         else:
             ROW(f"| {name} | 数据暂缺 | — | — |")
