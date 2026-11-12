@@ -37,24 +37,50 @@ def safe(name):
         return wrap
     return deco
 
+def _idx_em(ak, code, name):
+    """东财路径：含涨跌幅与成交额，首选。"""
+    d = ak.index_zh_a_hist(symbol=code, period="daily", start_date=start_date(),
+                           end_date=datetime.now().strftime("%Y%m%d"))
+    if len(d) < 6:
+        raise ValueError("insufficient rows")
+    last = d.iloc[-1]
+    amt = float(last["成交额"]) / 1e8
+    avg5 = d["成交额"].iloc[-6:-1].astype(float).mean() / 1e8
+    return float(last["收盘"]), float(last["涨跌幅"]), cum5(d["收盘"].tolist()), amt, avg5
+
+
+def _idx_sina(ak, code, sina_sym):
+    """新浪降级：无成交额（用成交量亿股代替），涨跌幅由收盘价推算。"""
+    d = ak.stock_zh_index_daily(symbol=sina_sym)
+    closes = d["close"].astype(float).tolist()
+    vols = d["volume"].astype(float).tolist()
+    if len(closes) < 6:
+        raise ValueError("insufficient rows")
+    day = pct(closes[-1], closes[-2])
+    vol = vols[-1] / 1e8
+    avg5 = sum(vols[-6:-1]) / 5 / 1e8
+    return closes[-1], day, cum5(closes), vol, avg5, True
+
+
 @safe("A股主要指数")
 def a_indices():
     import akshare as ak
-    codes = [("000001", "上证指数"), ("399001", "深证成指"), ("399006", "创业板指"), ("000688", "科创50")]
+    codes = [("000001", "上证指数", "sh000001"), ("399001", "深证成指", "sz399001"),
+             ("399006", "创业板指", "sz399006"), ("000688", "科创50", "sh000688")]
     ROW("| 指数 | 收盘 | 当日 | 近5日累计 | 成交额(vs 5日均) |")
     ROW("|---|---|---|---|---|")
-    for code, name in codes:
-        d = ak.index_zh_a_hist(symbol=code, period="daily", start_date=start_date(),
-                               end_date=datetime.now().strftime("%Y%m%d"))
-        if len(d) < 6:
-            ROW(f"| {name} | 数据暂缺 | — | — | — |")
-            continue
-        last = d.iloc[-1]
-        amt = float(last["成交额"]) / 1e8
-        avg5 = d["成交额"].iloc[-6:-1].astype(float).mean() / 1e8
-        c5 = cum5(d["收盘"].tolist())
-        ROW(f"| {name} | {last['收盘']} | {float(last['涨跌幅']):+.2f}% | "
-            f"{c5:+.2f}% | {amt:.0f}亿 / 均{avg5:.0f}亿 |")
+    for code, name, sina in codes:
+        try:
+            close, day, c5, amt, avg5 = _idx_em(ak, code, name)
+            ROW(f"| {name} | {close} | {day:+.2f}% | {c5:+.2f}% | {amt:.0f}亿 / 均{avg5:.0f}亿 |")
+        except Exception:
+            try:
+                close, day, c5, vol, avg5, _ = _idx_sina(ak, code, sina)
+                ROW(f"| {name} | {close:.2f} | {day:+.2f}% | {c5:+.2f}% | "
+                    f"量{vol:.1f}亿股 / 均{avg5:.1f}亿股※ |")
+            except Exception as e:
+                ROW(f"| {name} | 数据暂缺（{type(e).__name__}） | — | — | — |")
+    ROW("\n(※ 东财接口不可用时降级新浪源，仅有成交量无成交额)")
 
 @safe("港股指数")
 def hk_indices():
@@ -62,9 +88,20 @@ def hk_indices():
     ROW("| 指数 | 收盘 | 当日 | 近5日累计 |")
     ROW("|---|---|---|---|")
     for sym, name in [("HSI", "恒生指数"), ("HSTECH", "恒生科技")]:
-        d = ak.stock_hk_index_daily_em(symbol=sym)
-        closes = d["latest"].astype(float).tolist()
-        ROW(f"| {name} | {closes[-1]:.2f} | {pct(closes[-1], closes[-2]):+.2f}% | {cum5(closes):+.2f}% |")
+        closes = None
+        try:
+            d = ak.stock_hk_index_daily_em(symbol=sym)
+            closes = d["latest"].astype(float).tolist()
+        except Exception:
+            try:
+                d = ak.stock_hk_index_daily_sina(symbol=sym)
+                closes = d["close"].astype(float).tolist()
+            except Exception:
+                pass
+        if closes:
+            ROW(f"| {name} | {closes[-1]:.2f} | {pct(closes[-1], closes[-2]):+.2f}% | {cum5(closes):+.2f}% |")
+        else:
+            ROW(f"| {name} | 数据暂缺 | — | — |")
 
 @safe("美股指数（前一交易日收盘）")
 def us_indices():
@@ -79,7 +116,14 @@ def us_indices():
 @safe("行业板块涨跌（含5日累计与连续天数）")
 def boards():
     import akshare as ak
-    df = ak.stock_board_industry_name_em().sort_values("涨跌幅", ascending=False)
+    try:
+        df = ak.stock_board_industry_name_em().sort_values("涨跌幅", ascending=False)
+        name_col, chg_col = "板块名称", "涨跌幅"
+    except Exception:
+        # 新浪降级：无历史序列，只能看当日（连续天数/5日累计不可得）
+        df = ak.stock_sector_spot(indicator="新浪行业").sort_values("涨跌幅", ascending=False)
+        name_col, chg_col = "板块", "涨跌幅"
+        ROW("（东财接口不可用，降级新浪源：无5日累计与连续天数）")
 
     def enrich(name, day):
         try:
@@ -103,16 +147,23 @@ def boards():
             return f"{name}({day:+.2f}%)"
 
     ROW("**领涨板块**：")
-    ROW(", ".join(enrich(r["板块名称"], float(r["涨跌幅"])) for _, r in df.head(5).iterrows()))
+    ROW(", ".join(enrich(r[name_col], float(r[chg_col])) for _, r in df.head(5).iterrows()))
     ROW("\n**领跌板块**：")
-    ROW(", ".join(enrich(r["板块名称"], float(r["涨跌幅"])) for _, r in df.tail(5).iloc[::-1].iterrows()))
+    ROW(", ".join(enrich(r[name_col], float(r[chg_col])) for _, r in df.tail(5).iloc[::-1].iterrows()))
 
 @safe("个股涨跌与成交")
 def stocks():
     import akshare as ak
-    df = ak.stock_zh_a_spot_em()
+    try:
+        df = ak.stock_zh_a_spot_em()
+        df = df[["名称", "涨跌幅", "成交额", "最新价"]]
+    except Exception:
+        # 新浪降级
+        df = ak.stock_zh_a_spot()[["名称", "涨跌幅", "成交额", "最新价"]]
+        ROW("（东财接口不可用，降级新浪源）")
     df["涨跌幅"] = df["涨跌幅"].astype(float)
     df["成交额"] = df["成交额"].astype(float)
+    df["最新价"] = df["最新价"].astype(float)
     df = df[df["最新价"] > 0]
     top = df.sort_values("涨跌幅", ascending=False).head(5)
     bot = df.sort_values("涨跌幅").head(5)
