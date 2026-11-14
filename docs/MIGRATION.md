@@ -12,6 +12,8 @@
 | 部署流水线 | `.github/workflows/deploy.yml` | git 仓库 | 随 clone（push main 自动发布） |
 | 入库流水线 skill | `~/.agents/skills/article-toolkit/` | **普通目录（非 git）** | export 脚本打包 |
 | ima 归档 skill（收藏用） | `~/.agents/skills/ima-skill/` | 普通目录 | export 脚本打包 |
+| ima 凭证（API 调用必需） | `~/.config/ima/client_id` + `api_key` | 两个小文件（~100B） | **手工复制**（不进打包件，见 3.3） |
+| 抓取引擎 ego-browser | ego lite 二进制 + 浏览器 | 独立安装 | 新设备重装（见 3.1） |
 | 逐字稿工具源码 | `~/Documents/codebase/bili2text` | git 仓库（私有） | setup 脚本 clone |
 | 逐字稿命令 | `~/.local/bin/yt2text` | bili2text 安装产物 | 源码 clone 后重装 |
 | ZCode 项目记忆 | `~/.zcode/cli/memories/projects/ai-document-*/` | 普通目录 | export 脚本打包（可选） |
@@ -20,7 +22,7 @@
 
 - **收藏内容本体**：存在 ima 云端知识库（kb_id 见 article-toolkit/SKILL.md），与设备无关
 - **已发布文章**：全在 git 里；线上站点是 GitHub Pages 从仓库构建的，与设备无关
-- **密钥/token**：本库无任何本地密钥文件；gh/SSH 凭证属用户级，新设备重新登录即可
+- **gh/SSH 凭证**：属用户级，新设备重新登录/添加公钥即可（ima 凭证例外，见上表）
 - **定时任务**：本库无 launchd/crontab 任务；金融日报由 ZCode 会话驱动 `scripts/daily-market-data.py` 生成，换设备无需重建系统级任务
 
 ## 二、旧设备：导出（1 分钟）
@@ -41,11 +43,12 @@ bash scripts/migrate-export.sh
 
 | 依赖 | 用途 | 安装 |
 |------|------|------|
-| Node ≥ 20（推荐 22） | Astro 构建 | `brew install node@22` |
+| Node ≥ 20（推荐 22） | Astro 构建 + ima_api.cjs 脚本 | `brew install node@22` |
 | Python 3 | 金融数据脚本 | `brew install python3` |
 | git | 仓库 | `brew install git` |
 | gh CLI | 部署监控/私有仓库 clone | `brew install gh && gh auth login` |
 | SSH key（推 GitHub） | git push | `ssh-keygen` + 上传公钥到 GitHub |
+| **ego lite（ego-browser）** | 入库流水线的网页抓取引擎 | 按 ego-browser skill 的安装说明安装，装完跑 `ego-browser skill` 确认 |
 
 中国大陆设备访问 GitHub 不稳时先挂代理：`export HTTPS_PROXY=http://127.0.0.1:<端口>`。
 
@@ -58,7 +61,28 @@ bash scripts/migrate-setup.sh ~/Downloads/ai-document-migration-<日期>.tar.gz
 脚本会：clone 仓库到 `~/Documents/codebase/ai-document` → 安装 skills → 拷贝 ZCode 记忆
 → **自动把 skill 内的绝对路径适配为新设备 $HOME** → `npm ci` → 完整构建验证。
 
-### 3.3 逐字稿工具（用到 YouTube 逐字稿才需要）
+### 3.3 ima 凭证（精读/收藏上传 ima 必需）
+
+`ima_api.cjs` 调用 ima OpenAPI 需要 Client ID + API Key（缺凭证时报 `code: -100`）。两种方式：
+
+```bash
+# 方式 A：从旧设备复制两个小文件（AirDrop/scp 均可，不进迁移打包件）
+mkdir -p ~/.config/ima
+scp 旧设备:~/.config/ima/{client_id,api_key} ~/.config/ima/
+
+# 方式 B：重新获取——打开 https://ima.qq.com/agent-interface 领取 Client ID / API Key
+mkdir -p ~/.config/ima
+echo "your_client_id" > ~/.config/ima/client_id
+echo "your_api_key"  > ~/.config/ima/api_key
+```
+
+验证（应输出 ✅ Credentials configured）：
+
+```bash
+test -f ~/.config/ima/client_id && test -f ~/.config/ima/api_key && echo "✅ Credentials configured"
+```
+
+### 3.4 逐字稿工具（用到 YouTube 逐字稿才需要）
 
 ```bash
 gh repo clone banzheshenghuo/bili2text ~/Documents/codebase/bili2text
@@ -73,7 +97,7 @@ gh repo clone banzheshenghuo/bili2text ~/Documents/codebase/bili2text
 | 2 | 本地预览 | `npm run dev` → http://localhost:4321 | 首页/文章正常渲染 |
 | 3 | 推送权限 | 改个测试文件 commit + push | Actions 变绿，线上更新 |
 | 4 | 入库流水线 | 找一篇文章对 AI 说"精读" | 文章生成 + push + ima 归档 |
-| 5 | 收藏路由 | 对 AI 说"收藏 <URL>" | 只进 ima，站点无痕迹 |
+| 5 | 收藏路由 | 对 AI 说"收藏 <URL>" | 只进 ima，站点无痕迹（需 3.3 凭证就绪） |
 | 6 | 金融数据脚本 | `python3 scripts/daily-market-data.py --help` | 正常输出用法 |
 
 ## 五、注意事项
