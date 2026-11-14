@@ -38,4 +38,6 @@ fi
 find "$TDIR" -name ".DS_Store" -delete
 tar -czf "$OUT" -C "$TDIR" .
 say "完成: $OUT ($(du -h "$OUT" | cut -f1 | tr -d ' '))"
+say "⚠️  迁移包不含 ima 凭证（安全考虑）——记得手工复制 ~/.config/ima/{client_id,api_key} 到新设备"
+say "⚠️  新设备还需安装 ego-browser（抓取引擎）；清单见 docs/MIGRATION.md §一/§3.1"
 say "新设备运行: bash scripts/migrate-setup.sh ~/path/to/$(basename "$OUT")"

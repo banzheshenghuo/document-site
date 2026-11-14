@@ -2,6 +2,8 @@
 # 新设备：初始化文档库环境
 # 用法: bash scripts/migrate-setup.sh [迁移包.tar.gz]
 #   迁移包由旧设备的 scripts/migrate-export.sh 生成；不给参数则跳过 skills 安装
+# 目标：A 站点全量迁移（自动完成）；B 收集能力（精读/开源解读 + ima 归档，装好 skills 后补凭证即可）
+# 金融日报链路不在迁移范围（Python 环境不作为前置）
 set -euo pipefail
 
 BUNDLE="${1:-}"
@@ -11,11 +13,17 @@ DEST="${DEST:-$HOME/Documents/codebase/ai-document}"
 say() { echo "[setup] $*"; }
 die() { echo "[setup][错误] $*" >&2; exit 1; }
 
-# 1. 前置检查
-for cmd in git node npm python3; do
-  command -v "$cmd" >/dev/null || die "缺少 $cmd，先安装（见 docs/MIGRATION.md 第三节）"
+# 1. 前置检查（Node/git 硬性；python3 仅金融日报需要，缺了只提醒）
+for cmd in git node npm; do
+  command -v "$cmd" >/dev/null || die "缺少 $cmd，先安装（见 docs/MIGRATION.md §3.1）"
 done
-say "环境: Node $(node --version), $(python3 --version 2>&1 | awk '{print $2}')"
+say "环境: Node $(node --version)"
+if ! command -v python3 >/dev/null; then
+  say "提示: 无 python3——金融日报脚本本次不迁移，不影响站点与收集；将来需要时再装"
+fi
+if ! command -v gh >/dev/null; then
+  say "提示: 未装 gh CLI——部署监控/私有仓库 clone 需要它（brew install gh && gh auth login）"
+fi
 
 # 2. clone 仓库（公开仓库，无需认证；push 时才需要）
 if [ -d "$DEST/.git" ]; then
@@ -62,23 +70,40 @@ if [ -d "$TOOLKIT" ]; then
   fi
 fi
 
-# 5. 安装依赖 + 构建验证
+# 5. 安装依赖 + 构建验证（目标 A）
 say "npm ci 安装依赖..."
 npm ci
-say "构建验证中（约 1 分钟）..."
+say "构建验证中..."
 BUILD_LOG="${TMPDIR:-/tmp}/docsite-build.log"
 if npm run build > "$BUILD_LOG" 2>&1; then
   PAGES=$(grep -oE "[0-9]+ page\(s\) built" "$BUILD_LOG" | tail -1)
-  say "✓ 构建通过（${PAGES:-ok}）"
+  say "✓ 构建通过（${PAGES:-ok}）——目标 A 完成"
 else
   die "构建失败，日志: $BUILD_LOG"
 fi
 
-# 6. 收尾提示
+# 6. 收集能力（目标 B）状态检查
+if [ -f "$HOME/.config/ima/client_id" ] && [ -f "$HOME/.config/ima/api_key" ]; then
+  say "✓ ima 凭证已就绪"
+else
+  say "⚠️  ima 凭证缺失——精读/收藏上传 ima 会报 code:-100。补齐方式见 docs/MIGRATION.md §3.3："
+  echo "     方式 A: scp 旧设备:~/.config/ima/{client_id,api_key} ~/.config/ima/"
+  echo "     方式 B: 打开 https://ima.qq.com/agent-interface 领取后写入 ~/.config/ima/"
+fi
+command -v ego-browser >/dev/null && say "✓ ego-browser 已安装（抓取引擎）" \
+  || say "⚠️  未装 ego-browser——抓取网页需要它，按 ego-browser skill 安装说明补装"
+
+# 7. 收尾提示
 cat <<'EOF'
-[setup] 初始化完成。剩余手工步骤（见 docs/MIGRATION.md 第四节验证清单）:
-  1) gh auth login            —— 部署监控与私有仓库 clone
-  2) ssh -T git@github.com    —— 确认推送权限（新机器需先加 SSH key）
-  3) 对 AI 说"精读 <某URL>"    —— 真实演练入库流水线
-  4) 逐字稿需求: gh repo clone banzheshenghuo/bili2text（私有，先 gh auth login）
+[setup] 初始化完成。验证清单（docs/MIGRATION.md §四）:
+  —— A 层（站点）——
+  1) 本地预览: npm run dev → http://localhost:4321
+  2) 推送权限: 改测试文件 commit + push → Actions 变绿
+     （新机器需先: gh auth login / ssh-keygen 加公钥）
+  —— B 层（收集: 精读 + 开源解读）——
+  3) ima 凭证: 见上方检查结果，缺了按提示补
+  4) 闭环演练: 对 AI 说"精读 <URL>" 或 "开源解读 <URL>"
+  —— 可选 ——
+  5) 逐字稿: gh repo clone banzheshenghuo/bili2text（先 gh auth login）
+  金融日报不在迁移范围；将来要跑见 docs/MIGRATION.md §五-6
 EOF

@@ -1,29 +1,40 @@
 # 文档库迁移 SOP（换设备）
 
-> 目标：在新设备上完整恢复「安昙」文档库的**阅读/入库/发布**全流程。
+> 两个迁移目标：
+> **A. GitHub 文档站全量迁移** —— 新设备完整拥有站点：全部内容、构建能力、发布能力。
+> **B. 收集能力** —— 精读文章与开源库解读的入库流水线（抓取 → ima 归档 → 发布）在新设备可用。
+>
+> **金融日报不在迁移范围**：生成脚本随仓库克隆带着，但新设备不要求可运行（需要时另配 Python 环境）。
 > 原则：仓库是唯一真源，脚本只搬运仓库之外的东西。
 
 ## 一、迁移组件清单
 
+### 目标 A：站点（全量）
+
 | 组件 | 位置（旧设备） | 存放形态 | 迁移方式 |
 |------|----------------|----------|----------|
-| 文章内容（精读/日报/逐字稿） | `src/content/posts/` | **git 仓库** | `git clone` 即可，无需拷贝 |
-| 运维脚本（频道检测/金融数据） | `scripts/` | git 仓库 | 随 clone |
+| 全部文章内容（精读/开源解读/金融日报） | `src/content/posts/` | **git 仓库** | `git clone` |
+| 站点工程（页面/样式/类型系统） | `src/`、`DESIGN.md` | git 仓库 | 随 clone |
+| 运维脚本 | `scripts/` | git 仓库 | 随 clone |
 | 部署流水线 | `.github/workflows/deploy.yml` | git 仓库 | 随 clone（push main 自动发布） |
+| Node + git + gh + SSH key | 系统环境 | 用户级 | 新设备安装/登录 |
+
+### 目标 B：收集能力（精读 + 开源解读）
+
+| 组件 | 位置（旧设备） | 存放形态 | 迁移方式 |
+|------|----------------|----------|----------|
 | 入库流水线 skill | `~/.agents/skills/article-toolkit/` | **普通目录（非 git）** | export 脚本打包 |
-| ima 归档 skill（收藏用） | `~/.agents/skills/ima-skill/` | 普通目录 | export 脚本打包 |
-| ima 凭证（API 调用必需） | `~/.config/ima/client_id` + `api_key` | 两个小文件（~100B） | **手工复制**（不进打包件，见 3.3） |
+| ima 归档 skill | `~/.agents/skills/ima-skill/`（含 ima_api.cjs 等脚本） | 普通目录 | export 脚本打包 |
+| **ima 凭证** | `~/.config/ima/client_id` + `api_key` | 两个小文件（~100B） | **手工复制**（不进打包件，见 3.3） |
 | 抓取引擎 ego-browser | ego lite 二进制 + 浏览器 | 独立安装 | 新设备重装（见 3.1） |
-| 逐字稿工具源码 | `~/Documents/codebase/bili2text` | git 仓库（私有） | setup 脚本 clone |
-| 逐字稿命令 | `~/.local/bin/yt2text` | bili2text 安装产物 | 源码 clone 后重装 |
-| ZCode 项目记忆 | `~/.zcode/cli/memories/projects/ai-document-*/` | 普通目录 | export 脚本打包（可选） |
 
-**不需要迁移的：**
+### 明确不在范围
 
-- **收藏内容本体**：存在 ima 云端知识库（kb_id 见 article-toolkit/SKILL.md），与设备无关
-- **已发布文章**：全在 git 里；线上站点是 GitHub Pages 从仓库构建的，与设备无关
-- **gh/SSH 凭证**：属用户级，新设备重新登录/添加公钥即可（ima 凭证例外，见上表）
-- **定时任务**：本库无 launchd/crontab 任务；金融日报由 ZCode 会话驱动 `scripts/daily-market-data.py` 生成，换设备无需重建系统级任务
+- **金融日报运行环境**：Python 3 / akshare 不作要求；`scripts/daily-market-data.py` 等随仓库带着但新设备不验证
+- **逐字稿工具**（bili2text / yt2text）：仅当新设备也要处理视频逐字稿时才装（见 3.4，可选）
+- **收藏与原文内容本体**：存在 ima 云端知识库（kb_id 见 article-toolkit/SKILL.md），与设备无关
+- **gh/SSH 凭证**：属用户级，新设备重新登录/添加公钥即可（ima 凭证例外，是静态文件，见 3.3）
+- **定时任务**：本库无系统级定时任务；金融日报由 ZCode 会话驱动，不在本次范围
 
 ## 二、旧设备：导出（1 分钟）
 
@@ -35,24 +46,25 @@ bash scripts/migrate-export.sh
 脚本会：检查仓库无未推送提交 → 打包 `article-toolkit`、`ima-skill`、ZCode 记忆到
 `~/ai-document-migration-<日期>.tar.gz`（仓库本体不打包，走 git）。
 
-把生成的 tar.gz 和新设备的访问凭证（SSH key 或 gh 登录）准备好即可。
+随后准备两样东西随包一起带到新设备：**ima 凭证两个小文件**（`~/.config/ima/`，手工复制）；
+新设备的 GitHub 访问凭证（SSH key 或 gh 登录）。
 
-## 三、新设备：初始化（约 5 分钟）
+## 三、新设备：初始化
 
 ### 3.1 前置安装（一次性）
 
-| 依赖 | 用途 | 安装 |
-|------|------|------|
-| Node ≥ 20（推荐 22） | Astro 构建 + ima_api.cjs 脚本 | `brew install node@22` |
-| Python 3 | 金融数据脚本 | `brew install python3` |
-| git | 仓库 | `brew install git` |
-| gh CLI | 部署监控/私有仓库 clone | `brew install gh && gh auth login` |
-| SSH key（推 GitHub） | git push | `ssh-keygen` + 上传公钥到 GitHub |
-| **ego lite（ego-browser）** | 入库流水线的网页抓取引擎 | 按 ego-browser skill 的安装说明安装，装完跑 `ego-browser skill` 确认 |
+| 依赖 | 服务于 | 安装 |
+|------|--------|------|
+| Node ≥ 20（推荐 22） | A 构建 + B ima_api.cjs | `brew install node@22` |
+| git | A 仓库 | `brew install git` |
+| gh CLI | A 部署监控/私有仓库 clone | `brew install gh && gh auth login` |
+| SSH key（推 GitHub） | A git push | `ssh-keygen` + 上传公钥到 GitHub |
+| **ego lite（ego-browser）** | **B 网页抓取引擎** | 按 ego-browser skill 的安装说明安装，装完跑 `ego-browser skill` 确认 |
+| Python 3 | ~~金融日报~~（不在范围） | 跳过；将来要跑日报再装 |
 
 中国大陆设备访问 GitHub 不稳时先挂代理：`export HTTPS_PROXY=http://127.0.0.1:<端口>`。
 
-### 3.2 运行初始化脚本
+### 3.2 运行初始化脚本（目标 A 自动完成）
 
 ```bash
 bash scripts/migrate-setup.sh ~/Downloads/ai-document-migration-<日期>.tar.gz
@@ -61,7 +73,7 @@ bash scripts/migrate-setup.sh ~/Downloads/ai-document-migration-<日期>.tar.gz
 脚本会：clone 仓库到 `~/Documents/codebase/ai-document` → 安装 skills → 拷贝 ZCode 记忆
 → **自动把 skill 内的绝对路径适配为新设备 $HOME** → `npm ci` → 完整构建验证。
 
-### 3.3 ima 凭证（精读/收藏上传 ima 必需）
+### 3.3 ima 凭证（目标 B 必需）
 
 `ima_api.cjs` 调用 ima OpenAPI 需要 Client ID + API Key（缺凭证时报 `code: -100`）。两种方式：
 
@@ -82,28 +94,35 @@ echo "your_api_key"  > ~/.config/ima/api_key
 test -f ~/.config/ima/client_id && test -f ~/.config/ima/api_key && echo "✅ Credentials configured"
 ```
 
-### 3.4 逐字稿工具（用到 YouTube 逐字稿才需要）
+### 3.4 逐字稿工具（可选，仅当新设备也要处理视频）
 
 ```bash
 gh repo clone banzheshenghuo/bili2text ~/Documents/codebase/bili2text
 # 按 bili2text 仓库 README 安装 yt2text 命令
 ```
 
-## 四、验证清单
+## 四、验证清单（按目标分层）
+
+**A 层——站点：**
 
 | # | 验证项 | 命令/操作 | 预期 |
 |---|--------|-----------|------|
-| 1 | 构建通过 | setup 脚本已跑；或 `npm run build` | 构建完成无报错（页数随内容变动） |
-| 2 | 本地预览 | `npm run dev` → http://localhost:4321 | 首页/文章正常渲染 |
+| 1 | 构建通过 | setup 脚本已跑；或 `npm run build` | 构建完成无报错 |
+| 2 | 本地预览 | `npm run dev` → http://localhost:4321 | 首页三频道/文章正常渲染 |
 | 3 | 推送权限 | 改个测试文件 commit + push | Actions 变绿，线上更新 |
-| 4 | 入库流水线 | 找一篇文章对 AI 说"精读" | 文章生成 + push + ima 归档 |
-| 5 | 收藏路由 | 对 AI 说"收藏 <URL>" | 只进 ima，站点无痕迹（需 3.3 凭证就绪） |
-| 6 | 金融数据脚本 | `python3 scripts/daily-market-data.py --help` | 正常输出用法 |
+
+**B 层——收集（精读 + 开源解读）：**
+
+| # | 验证项 | 命令/操作 | 预期 |
+|---|--------|-----------|------|
+| 4 | ima 凭证 | §3.3 的 test 命令 | ✅ Credentials configured |
+| 5 | 收藏路由 | 对 AI 说"收藏 <URL>" | 只进 ima 对应知识库，站点无痕迹 |
+| 6 | 收集闭环 | 对 AI 说"精读 <URL>" 或"开源解读 <URL>" | 原文进 ima + 成品上站 + 部署成功 |
 
 ## 五、注意事项
 
-1. **绝对路径**：article-toolkit 的 SKILL.md/fetch.md 等文件内嵌了 `/Users/<用户名>/...` 绝对路径，
-   setup 脚本会自动替换为新设备的 `$HOME`；若新设备用了非标准目录结构，手动检查这 5 个文件
+1. **绝对路径**：article-toolkit 的文件内嵌 `/Users/<用户名>/...` 绝对路径，setup 脚本会自动替换
+   为新设备 `$HOME`；若新设备用了非标准目录结构，手动检查技能目录下 5 个文件
 2. **ZCode 记忆目录名**含项目路径 hash（`ai-document-430e3d445094b620`）：新设备路径与旧设备
    一致时大概率直接生效；不一致时记忆不自动加载，内容仍在，可让 AI 重新沉淀
 3. **ZCode 自动化**：若旧设备上有跟本库相关的 ZCode 定时自动化（CronList 查看），需在新设备
@@ -111,3 +130,5 @@ gh repo clone banzheshenghuo/bili2text ~/Documents/codebase/bili2text
 4. **ima 知识库 kb_id** 写死在 article-toolkit/SKILL.md，属云端资源，跨设备通用，无需改动
 5. **双设备并行**：内容真源是 GitHub 仓库，两台设备各自 pull/push 即可，无锁定问题；
    入库前习惯先 `git pull` 减少冲突
+6. **金融日报**：如将来要在新设备跑日报，补装 Python 3 + 依赖后按
+   `scripts/daily-market-data.py --help` 使用；跑之前先 `git pull` 拿到最新脚本
