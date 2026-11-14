@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import SearchBox from '../components/SearchBox.astro'
 import DocCard from '../components/DocCard.astro'
 import { getCollection } from 'astro:content'
-import { CATEGORIES } from '../site'
+import { CATEGORIES, ARTICLE_TYPES, ARTICLE_TYPE_LABELS } from '../site'
 
 // 获取所有文档
 const allDocs = await getCollection('posts')
@@ -18,6 +18,7 @@ const sortedDocs = allDocs.sort((a, b) => {
 // 分类文档（基于显式 type 字段）
 const readDocs = sortedDocs.filter(doc => doc.data.type === 'read')
 const dailyFinanceDocs = sortedDocs.filter(doc => doc.data.type === 'daily-finance')
+const ossReviewDocs = sortedDocs.filter(doc => doc.data.type === 'oss-review')
 
 // 分类定义与计数（顺序来源于 site.ts 的唯一枚举）
 const categoryCounts = new Map<string, number>()
@@ -27,19 +28,14 @@ sortedDocs.forEach(doc => {
 })
 const categories = CATEGORIES.map(c => ({ name: c, count: categoryCounts.get(c) || 0 }))
 
-// 收集所有标签
-const allTags = new Set<string>()
-sortedDocs.forEach(doc => {
-  (doc.data.tags || []).forEach((t: string) => allTags.add(t))
-})
-
 // 构建搜索索引
 const searchIndex = sortedDocs.map(doc => ({
   slug: doc.slug,
   title: doc.data.title,
   description: doc.data.description || '',
   tags: (doc.data.tags || []).join(' '),
-  date: doc.data.date || ''
+  date: doc.data.date || '',
+  type: doc.data.type || ''
 }))
 
 // 默认显示全部文档
@@ -57,7 +53,7 @@ let activeType = 'all'
       </div>
       <div class="hero-content">
         <h1>安昙</h1>
-        <p class="subtitle">探索、学习、分享技术知识</p>
+        <p class="subtitle">精读解读 · 金融日报 · 开源库解读</p>
         <div class="hero-stats">
           <div class="stat-item">
             <span class="stat-number">{sortedDocs.length}</span>
@@ -65,13 +61,18 @@ let activeType = 'all'
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
-            <span class="stat-number">{allTags.size}</span>
-            <span class="stat-label">个标签</span>
+            <span class="stat-number">{readDocs.length}</span>
+            <span class="stat-label">篇精读</span>
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
-            <span class="stat-number">{readDocs.length}</span>
-            <span class="stat-label">篇精读</span>
+            <span class="stat-number">{dailyFinanceDocs.length}</span>
+            <span class="stat-label">篇日报</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">{ossReviewDocs.length}</span>
+            <span class="stat-label">篇开源解读</span>
           </div>
         </div>
       </div>
@@ -81,29 +82,6 @@ let activeType = 'all'
 
     <section class="docs-section">
       <h2 class="section-title">
-        <div class="filter-group">
-          <span class="filter-label">类型</span>
-          <div class="tabs-container">
-            <button
-              class={`tab-button ${activeType === 'all' ? 'active' : ''}`}
-              data-type-filter="all"
-            >
-              全部 <span class="tab-count">({sortedDocs.length})</span>
-            </button>
-            <button
-              class={`tab-button ${activeType === 'read' ? 'active' : ''}`}
-              data-type-filter="read"
-            >
-              精读 <span class="tab-count">({readDocs.length})</span>
-            </button>
-            <button
-              class={`tab-button ${activeType === 'daily-finance' ? 'active' : ''}`}
-              data-type-filter="daily-finance"
-            >
-              金融日报 <span class="tab-count">({dailyFinanceDocs.length})</span>
-            </button>
-          </div>
-        </div>
         <div class="filter-group">
           <span class="filter-label">时间</span>
           <div class="tabs-container">
@@ -179,12 +157,18 @@ let activeType = 'all'
     </section>
   </div>
 
-  <script is:inline>
+  <script is:inline define:vars={{ typeLabels: ARTICLE_TYPE_LABELS, validTypes: ARTICLE_TYPES }}>
     const PAGE_SIZE = 18
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
-    let activeType = 'all'
+    // 类型状态由 URL ?type= 派生（Header 切换器写入）；无参数 = 全部混排
+    function readTypeFromURL() {
+      const t = new URLSearchParams(location.search).get('type')
+      return validTypes.includes(t) ? t : 'all'
+    }
+
+    let activeType = readTypeFromURL()
     let activeTime = 'all'
     let activeCategory = 'all'
     let visibleCount = PAGE_SIZE
@@ -239,7 +223,6 @@ let activeType = 'all'
     function switchType(t) {
       activeType = t
       visibleCount = PAGE_SIZE
-      setGroupActive('data-type-filter', t)
       updateDocGrid()
     }
 
@@ -263,9 +246,6 @@ let activeType = 'all'
       })
     }
 
-    document.querySelectorAll('[data-type-filter]').forEach(btn => {
-      btn.addEventListener('click', () => switchType(btn.getAttribute('data-type-filter')))
-    })
     document.querySelectorAll('[data-time-filter]').forEach(btn => {
       btn.addEventListener('click', () => switchTime(btn.getAttribute('data-time-filter')))
     })
@@ -300,10 +280,9 @@ let activeType = 'all'
         emptyState.style.display = 'block'
         const p = emptyState.querySelector('p')
         if (p) {
-          const typeNames = { read: '精读', 'daily-finance': '金融日报' }
           const timeNames = { today: '今天', '3d': '近3天', '7d': '近7天' }
           const parts = []
-          if (activeType !== 'all') parts.push(typeNames[activeType])
+          if (activeType !== 'all') parts.push(typeLabels[activeType] || activeType)
           if (activeTime !== 'all') parts.push(timeNames[activeTime])
           if (activeCategory !== 'all') parts.push(`「${activeCategory}」`)
           p.textContent = parts.length ? `${parts.join(' + ')} 筛选下暂无文章` : '暂无文档'
@@ -351,6 +330,31 @@ let activeType = 'all'
         cardObserver.observe(card)
       }
     }
+
+    // 卡片鼠标跟踪光效（单事件委托，替代原先每卡一份的内联脚本）
+    const docsGrid = document.querySelector('.docs-grid')
+    if (docsGrid) {
+      docsGrid.addEventListener('mousemove', (e) => {
+        const card = e.target.closest('.doc-card')
+        if (!card) return
+        const rect = card.getBoundingClientRect()
+        card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`)
+        card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`)
+      })
+    }
+
+    // 首页标记：Header 切换器据此拦截点击做即时切换（详情页保持默认导航）
+    window.__INDEX_PAGE__ = true
+
+    // Header 三段切换器事件
+    window.addEventListener('typechange', (e) => {
+      switchType(e.detail.type)
+    })
+
+    // 浏览器前进/后退：从 URL 重新派生类型
+    window.addEventListener('popstate', () => {
+      switchType(readTypeFromURL())
+    })
 
     // 初始渲染
     updateDocGrid()
@@ -424,7 +428,7 @@ let activeType = 'all'
   }
 
   .hero-content::before {
-    content: "KNOWLEDGE BASE";
+    content: "INFO STREAM";
     display: block;
     font-family: var(--font-mono);
     font-size: 0.75rem;

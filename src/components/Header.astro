@@ -1,9 +1,16 @@
 ---
-import { SITE } from '../site'
+import { SITE, ARTICLE_TYPES, ARTICLE_TYPE_LABELS } from '../site'
 
 // 使用 base URL 构建正确的首页链接(根路径部署时剥尾斜杠会得空串,首页链接需回退 '/')
 const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
 const homeHref = basePath || '/'
+
+// 移动端短标签（<640px 防溢出）
+const SHORT_LABELS: Record<string, string> = {
+  read: '精读',
+  'daily-finance': '日报',
+  'oss-review': '开源',
+}
 ---
 
 <header class="header" id="site-header">
@@ -24,7 +31,19 @@ const homeHref = basePath || '/'
     </a>
 
     <nav class="nav">
-      <a href={homeHref}>首页</a>
+      <div class="stream-switch" role="tablist" aria-label="信息流切换">
+        {ARTICLE_TYPES.map((t) => (
+          <a
+            href={`${homeHref}?type=${t}`}
+            data-type-link={t}
+            role="tab"
+            aria-label={ARTICLE_TYPE_LABELS[t]}
+          >
+            <span class="label-full">{ARTICLE_TYPE_LABELS[t]}</span>
+            <span class="label-short" aria-hidden="true">{SHORT_LABELS[t]}</span>
+          </a>
+        ))}
+      </div>
       <button class="theme-toggle" aria-label="切换主题">
         <svg class="sun-icon" width="18" height="18" viewBox="0 0 20 20" fill="none">
           <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="2"/>
@@ -63,6 +82,7 @@ const homeHref = basePath || '/'
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.75rem;
   }
 
   .logo {
@@ -71,6 +91,7 @@ const homeHref = basePath || '/'
     gap: 0.5rem;
     color: var(--color-text);
     transition: opacity 0.2s;
+    flex-shrink: 0;
   }
 
   .logo:hover {
@@ -101,19 +122,59 @@ const homeHref = basePath || '/'
   .nav {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.875rem;
+    min-width: 0;
   }
 
-  .nav a {
+  /* 全局信息流切换器：容器式三段控制 */
+  .stream-switch {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 2px;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+
+  .stream-switch a {
     font-family: var(--font-mono);
-    color: var(--color-text-secondary);
-    transition: color 0.2s;
     font-size: 0.8125rem;
     letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    padding: 0.3125rem 0.875rem;
+    border-radius: 999px;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background-color 0.2s, transform 0.1s;
+    white-space: nowrap;
   }
 
-  .nav a:hover {
+  .stream-switch a:hover {
     color: var(--color-primary);
+    background: var(--color-bg-secondary);
+  }
+
+  .stream-switch a:active {
+    transform: translateY(-1px);
+  }
+
+  .stream-switch a.active {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  }
+
+  .stream-switch a.active:hover {
+    background: var(--color-primary-hover);
+    color: #fff;
+  }
+
+  .stream-switch a .label-short {
+    display: none;
   }
 
   .theme-toggle {
@@ -127,6 +188,7 @@ const homeHref = basePath || '/'
     justify-content: center;
     border-radius: 0.5rem;
     transition: all 0.2s;
+    flex-shrink: 0;
   }
 
   .theme-toggle:hover {
@@ -141,13 +203,28 @@ const homeHref = basePath || '/'
   [data-theme='dark'] .moon-icon {
     display: block;
   }
+
+  @media (max-width: 640px) {
+    .stream-switch a {
+      min-height: 44px;
+      padding: 0.3125rem 0.625rem;
+      font-size: 0.75rem;
+    }
+
+    .stream-switch a .label-full {
+      display: none;
+    }
+
+    .stream-switch a .label-short {
+      display: inline;
+    }
+  }
 </style>
 
 <script>
   // Header 滚动效果
   const header = document.getElementById('site-header')
   if (header) {
-    let lastScroll = 0
     window.addEventListener('scroll', () => {
       const currentScroll = window.scrollY
       if (currentScroll > 10) {
@@ -155,7 +232,38 @@ const homeHref = basePath || '/'
       } else {
         header.classList.remove('scrolled')
       }
-      lastScroll = currentScroll
     }, { passive: true })
   }
+
+  // 信息流切换器：激活态从 URL 派生；首页拦截点击做即时切换（pushState + typechange 事件），
+  // 其他页面（详情页）走默认链接导航
+  function syncActive() {
+    const current = new URLSearchParams(location.search).get('type')
+    document.querySelectorAll<HTMLAnchorElement>('[data-type-link]').forEach((a) => {
+      a.classList.toggle('active', a.dataset.typeLink === current)
+      a.setAttribute('aria-selected', String(a.dataset.typeLink === current))
+    })
+  }
+  syncActive()
+  window.addEventListener('popstate', syncActive)
+
+  const isIndexPage = () => Boolean((window as any).__INDEX_PAGE__)
+
+  document.querySelectorAll<HTMLAnchorElement>('[data-type-link]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      if (!isIndexPage()) return // 详情页等：默认导航回首页对应频道
+      e.preventDefault()
+      const type = a.dataset.typeLink!
+      const current = new URLSearchParams(location.search).get('type')
+      const url = new URL(location.href)
+      if (type === current) {
+        url.searchParams.delete('type') // 点击已激活段 → 回到全部
+      } else {
+        url.searchParams.set('type', type)
+      }
+      history.pushState({}, '', url)
+      syncActive()
+      window.dispatchEvent(new CustomEvent('typechange', { detail: { type: type === current ? 'all' : type } }))
+    })
+  })
 </script>

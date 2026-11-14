@@ -1,6 +1,6 @@
 export const SITE = {
   title: '安昙',
-  description: '由 AI 生成的技术文档集合',
+  description: '精读解读 · 金融日报 · 开源库解读——AI 时代的信息站',
   defaultLang: 'zh-CN'
 }
 
@@ -16,14 +16,22 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number]
 
-// 文章类型（与主题分类正交：read=精读解读，daily-finance=每日金融日报）。
+// 文章类型（与主题分类正交）。信息站三类信息流：
+// read=精读解读，daily-finance=每日金融日报，oss-review=开源库解读。
 // 原文全文（逐字稿/收藏）不上站，统一归档到 ima 知识库。
-export const ARTICLE_TYPES = ['read', 'daily-finance'] as const
+export const ARTICLE_TYPES = ['read', 'daily-finance', 'oss-review'] as const
 
 export type ArticleType = (typeof ARTICLE_TYPES)[number]
 
+// 类型中文标签唯一来源（Header 切换器、卡片 chip、空状态文案共用）
+export const ARTICLE_TYPE_LABELS: Record<ArticleType, string> = {
+  read: '精读',
+  'daily-finance': '金融日报',
+  'oss-review': '开源解读',
+}
+
 export const HOME = {
-  intro: '欢迎来到安昙的知识库',
-  subtitle: '探索、学习、分享技术知识',
-  searchPlaceholder: '搜索文档...'
+  intro: '欢迎来到安昙的信息站',
+  subtitle: '精读解读 · 金融日报 · 开源库解读',
+  searchPlaceholder: '搜索信息...'
 }

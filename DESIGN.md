@@ -1,4 +1,4 @@
-# Design System: 安昙的知识库（ai-document）
+# Design System: 安昙信息站（ai-document）
 
 > 单一设计真源。所有新页面、新组件（含分类筛选）必须遵循本文件。
 > 基线评估：Density 5（Daily App Balanced）/ Variance 4（Offset Asymmetric）/ Motion 5（Fluid CSS）。
@@ -25,8 +25,8 @@
 
 - Canvas #09090B / Secondary #18181B / Text #FAFAFA / Muted #A1A1AA / Border #27272A / Signal #60A5FA / Hover #93C5FD
 
-**约束**：全站唯一强调色为 Signal Blue。卡片顶条的 read/collect/note/transcript 渐变（蓝 / amber-red / emerald / cyan）
-是仅有的四处语义色，只允许出现在 3px 装饰条上。禁止新增紫色、霓虹渐变、纯黑 #000000。
+**约束**：全站唯一强调色为 Signal Blue。卡片顶条的 read/oss-review/daily-finance 渐变（蓝 / 翠绿 / 琥珀）
+是仅有的三处语义色，只允许出现在 3px 装饰条与类型 chip 上。禁止新增紫色、霓虹渐变、纯黑 #000000。
 
 ## 3. Typography Rules
 
@@ -37,18 +37,24 @@
 
 ## 4. Component Stylings
 
-- **Filter Chip（筛选按钮，三维统一语言）**：999px 胶囊、mono 0.8125rem、
+- **Header 信息流切换器（全局三段，页面右上角）**：容器式 segmented control——1px Whisper 边框、
+  999px 胶囊、2px 内衬；段内 mono 0.8125rem、padding 0.3125rem 0.875rem（移动端 min-height 44px、
+  短标签 精读/日报/开源）。active 为 Signal Blue 实底白字 + `0 2px 8px rgba(37,99,235,0.25)` 柔影。
+  状态由 URL `?type=` 派生：无参数 = 全部混排、无激活段；点击已激活段回到全部。
+  首页拦截点击即时切换（pushState + typechange 事件），详情页走默认导航。
+- **Filter Chip（页内筛选按钮，两维统一语言）**：999px 胶囊、mono 0.8125rem、
   min-height 36px（移动端 44px）。默认 border + Zinc-500 文字；hover 边框与文字
   转 Signal Blue + 6% 蓝底；active 为 Signal Blue 实底白字 +
   `0 2px 8px rgba(37,99,235,0.25)` 柔影，active 按压 -1px。计数 0.6875rem、60% 透明度。
-  三个筛选维度——**类型**（全部/精读/金融日报）、**时间**（全部/今天/近3天/近7天，计数访问时
-  动态计算）、**主题**（全部分类 + 6 类）——**共用同一按钮样式**，AND 组合过滤；
+  两个筛选维度——**时间**（全部/今天/近3天/近7天，计数访问时动态计算）、**主题**（全部分类 + 6 类）
+  ——**共用同一按钮样式**，AND 组合过滤；类型维度已上收至 Header 切换器，不再出现在页内。
   靠行首 mono 行标（0.6875rem、Muted Steel，高度等于按钮首行并垂直居中实现顶对齐）
   区分维度。空状态消息组合呈现激活维度（如「金融日报 + 今天 筛选下暂无文章」）。
   移动端行内横向滚动，行标固定不滚。
-- **Card**：0.5rem 圆角、1px Whisper Border、3px 纯色顶条（蓝=精读 / 琥珀=金融日报 /
-  灰=无类型，**不放文字**）。类型文字在 meta 行以 chip 呈现：精读=8% 蓝底蓝字、
-  金融日报=12% 琥珀底琥珀字（dark 模式 #fbbf24 / 15% 琥珀底），
+- **Card**：0.5rem 圆角、1px Whisper Border、3px 纯色顶条（蓝=精读 / 翠绿=开源解读 /
+  琥珀=金融日报 / 灰=无类型，**不放文字**）。类型文字在 meta 行以 chip 呈现：精读=8% 蓝底蓝字、
+  开源解读=10% 翠绿底 #047857 字（dark 模式 #34d399 / 14% 翠绿底）、
+  金融日报=12% 琥珀底 #b45309 字（dark 模式 #fbbf24 / 15% 琥珀底），
   4px 圆角 mono 0.625rem。
   hover：-4px translateY + 边框转 25% 蓝 + 鼠标跟踪径向微光（6% 蓝）。
 - **Empty State**：居中、4rem 留白、Muted Steel 文案，明确指出该分类/筛选无内容，绝不放 "No data"。
@@ -57,8 +63,8 @@
 ## 5. Layout Principles
 
 - 首页容器 max-width 900px 居中；卡片网格 `repeat(auto-fill, minmax(280px, 1fr))`，gap 1.25rem
-- Hero 左对齐（Variance > 4，禁止居中 Hero）；统计行用 4px 圆点分隔，mono 数字
-- 三维筛选各自独立成行，垂直 gap 0.75rem：每行 = mono 行标（与首行按钮顶对齐）+ 胶囊按钮组（类型 / 时间 / 主题）
+- Hero 左对齐（Variance > 4，禁止居中 Hero）；眉标纯 mono 大写 `INFO STREAM`；统计行用 4px 圆点分隔，mono 数字（总篇数 + 三类型计数，全部来自内容集合真实统计）
+- 两维筛选（时间 / 主题）各自独立成行，垂直 gap 0.75rem：每行 = mono 行标（与首行按钮顶对齐）+ 胶囊按钮组；类型维度由 Header 切换器承担
 - 移动端（< 640px）：网格塌陷单列、pill 行横向滚动、触控目标 ≥ 44px
 - 禁止：元素重叠、绝对定位堆叠、flex 百分比算术、`calc()` hack
 
