@@ -1,214 +1,259 @@
-/* 全局样式补充 */
+/* ============================================================
+   prose.css — 文章正文排版（2026-11-17 重写）
+   根因修复：此前该文件从未被引入，且 [slug].astro 里的 scoped
+   样式选择器对 <Content /> 输出不生效（无 data-astro-cid），
+   导致 markdown 正文长期是浏览器默认样式。
+   本文件由 BaseLayout 全局引入，选择器直接命中，无需 :global。
+   ============================================================ */
 
- prose {
-  --tw-prose-body: var(--color-text);
-  --tw-prose-headings: var(--color-text);
-  --tw-prose-links: var(--color-primary);
-  --tw-prose-bold: var(--color-text);
-  --tw-prose-code: var(--color-primary);
-  --tw-prose-pre-code: var(--color-text);
-  --tw-prose-pre-bg: var(--color-code-bg);
-  --tw-prose-quotes: var(--color-text-secondary);
-}
+/* ---------- 基础：所有文章 ---------- */
 
-/* 文章内容样式 */
 .doc-content {
-  max-width: 720px;
+  font-size: 1rem;
+  line-height: 1.85;
 }
 
-.doc-content :global(h1) {
-  font-size: 2rem;
+/* 标题层级：锚点跳转不被 sticky 头遮挡；防孤行 */
+.doc-content h1,
+.doc-content h2,
+.doc-content h3,
+.doc-content h4 {
+  scroll-margin-top: 5.5rem;
+  text-wrap: balance;
+  color: var(--color-text);
+}
+
+.doc-content h2 {
+  font-size: 1.5rem;
   font-weight: 700;
-  margin: 2rem 0 1rem;
+  letter-spacing: -0.01em;
+  margin: 3rem 0 1.1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--color-border);
 }
 
-.doc-content :global(h2) {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 1.75rem 0 0.75rem;
+.doc-content h3 {
+  font-size: 1.1875rem;
+  font-weight: 650;
+  margin: 2.25rem 0 0.75rem;
 }
 
-.doc-content :global(h3) {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 1.5rem 0 0.5rem;
+.doc-content p {
+  margin: 0 0 1.1em;
 }
 
-.doc-content :global(p) {
-  margin: 1rem 0;
-  line-height: 1.75;
+.doc-content strong {
+  font-weight: 650;
 }
 
-.doc-content :global(ul),
-.doc-content :global(ol) {
-  margin: 1rem 0;
+/* 列表：更紧的行距，避免一屏全是空白 */
+.doc-content ul,
+.doc-content ol {
+  margin: 0 0 1.25rem;
   padding-left: 1.5rem;
 }
 
-.doc-content :global(li) {
-  margin: 0.5rem 0;
+.doc-content li {
+  margin: 0.45em 0;
+  line-height: 1.75;
 }
 
-.doc-content :global(blockquote) {
+.doc-content li::marker {
+  color: var(--color-text-secondary);
+}
+
+/* 引用：默认浅色提示条 */
+.doc-content blockquote {
   margin: 1.5rem 0;
-  padding: 0.5rem 1rem;
-  border-left: 4px solid var(--color-primary);
+  padding: 0.75rem 1.125rem;
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 0.5rem 0.5rem 0;
   background: var(--color-bg-secondary);
   color: var(--color-text-secondary);
 }
 
-.doc-content :global(a) {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.doc-content blockquote p {
+  margin: 0.25em 0;
 }
 
-.doc-content :global(img) {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.5rem;
-  margin: 1.5rem 0;
-}
-
-.doc-content :global(table) {
+/* 表格：去掉满格边框，横线分隔 + 斑马纹 + 等宽数字 */
+.doc-content table {
+  display: block;
   width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-collapse: collapse;
-  margin: 1.5rem 0;
+  margin: 1.75rem 0;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
 }
 
-.doc-content :global(th),
-.doc-content :global(td) {
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
+.doc-content thead th {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.doc-content tbody td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
   text-align: left;
 }
 
-.doc-content :global(th) {
-  background: var(--color-bg-secondary);
-  font-weight: 600;
+.doc-content tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--color-bg-secondary) 55%, transparent);
 }
 
-/* 代码块样式增强 */
-.doc-content :global(pre) {
-  border-radius: 0.5rem;
+.doc-content tbody tr:last-child td {
+  border-bottom: 2px solid var(--color-border);
+}
+
+/* 分隔线（日报中的 ---） */
+.doc-content hr {
+  border: none;
+  height: 1px;
+  background: var(--color-color-border, var(--color-border));
+  margin: 2.75rem 0;
+  opacity: 0.8;
+}
+
+.doc-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.625rem;
+  margin: 1.5rem 0;
+}
+
+.doc-content code:not(pre code) {
+  background: var(--color-bg-secondary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.doc-content pre {
+  border-radius: 0.625rem;
   overflow-x: auto;
   margin: 1.5rem 0;
 }
 
-.doc-content :global(code:not(pre code)) {
-  background: var(--color-bg-secondary);
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-size: 0.9em;
+/* ---------- 金融日报定制（.type-daily-finance） ---------- */
+
+.type-daily-finance {
+  --df-accent: #d97706;        /* 琥珀主色（浅色） */
+  --df-accent-soft: #f59e0b;
+  --df-tint: rgba(245, 158, 11, 0.07);
 }
 
-/* 标题锚点样式 */
-.doc-content :global(h1 .heading-link),
-.doc-content :global(h2 .heading-link),
-.doc-content :global(h3 .heading-link),
-.doc-content :global(h4 .heading-link),
-.doc-content :global(h5 .heading-link),
-.doc-content :global(h6 .heading-link) {
-  position: relative;
+html[data-theme='dark'] .type-daily-finance {
+  --df-accent: #fbbf24;
+  --df-accent-soft: #f59e0b;
+  --df-tint: rgba(251, 191, 36, 0.08);
 }
 
-.doc-content :global(h1 .heading-link)::before,
-.doc-content :global(h2 .heading-link)::before,
-.doc-content :global(h3 .heading-link)::before,
-.doc-content :global(h4 .heading-link)::before,
-.doc-content :global(h5 .heading-link)::before,
-.doc-content :global(h6 .heading-link)::before {
-  content: '#';
-  position: absolute;
-  left: -1.5rem;
-  color: var(--color-text-secondary);
-  opacity: 0;
-  transition: opacity 0.2s;
-  font-weight: 300;
+/* 章节标题：琥珀左侧竖条，与首页日报卡片的琥珀条呼应 */
+.type-daily-finance .doc-content h2 {
+  border-bottom: none;
+  margin-top: 3.5rem;
+  padding: 0.125rem 0 0.125rem 0.875rem;
+  border-left: 4px solid var(--df-accent-soft);
+  font-size: 1.375rem;
 }
 
-.doc-content :global(h1:hover .heading-link)::before,
-.doc-content :global(h2:hover .heading-link)::before,
-.doc-content :global(h3:hover .heading-link)::before,
-.doc-content :global(h4:hover .heading-link)::before,
-.doc-content :global(h5:hover .heading-link)::before,
-.doc-content :global(h6:hover .heading-link)::before {
-  opacity: 1;
+.type-daily-finance .doc-content > h2:first-of-type {
+  margin-top: 0.5rem;
 }
 
-/* Mermaid 图表样式 */
-.doc-content :global(.mermaid) {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background: var(--color-bg-secondary);
-  border-radius: 0.75rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
+.type-daily-finance .doc-content h3 {
+  font-size: 1.0625rem;
+  font-weight: 650;
+  color: var(--color-text);
 }
 
-.doc-content :global(.mermaid svg) {
-  max-width: 100%;
-  height: auto;
+/* 数字表格：首列左对齐加粗，其余列右对齐（行情表全是"标签+数字"结构） */
+.type-daily-finance .doc-content thead th:not(:first-child),
+.type-daily-finance .doc-content tbody td:not(:first-child) {
+  text-align: right;
 }
 
-/* 信息框样式 */
-.doc-content :global(.info-box),
-.doc-content :global(.warning-box),
-.doc-content :global(.success-box),
-.doc-content :global(.error-box) {
-  padding: 1rem 1.25rem;
-  border-radius: 0.5rem;
-  margin: 1.5rem 0;
-  border-left: 4px solid;
+.type-daily-finance .doc-content thead th:first-child,
+.type-daily-finance .doc-content tbody td:first-child {
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.doc-content :global(.info-box) {
-  background: rgba(37, 99, 235, 0.1);
-  border-color: #2563EB;
+.type-daily-finance .doc-content table {
+  border-top: 2px solid var(--df-accent-soft);
+  border-radius: 0 0 0.5rem 0.5rem;
 }
 
-.doc-content :global(.warning-box) {
-  background: rgba(245, 158, 11, 0.1);
-  border-color: #f59e0b;
+.type-daily-finance .doc-content tbody tr:nth-child(even) {
+  background: var(--df-tint);
 }
 
-.doc-content :global(.success-box) {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: #22c55e;
+.type-daily-finance .doc-content tbody tr:last-child td {
+  border-bottom: none;
 }
 
-.doc-content :global(.error-box) {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
+/* 开篇说明（blockquote）：琥珀提示条 */
+.type-daily-finance .doc-content blockquote {
+  border-left-color: var(--df-accent-soft);
+  background: var(--df-tint);
+  color: var(--color-text);
+  font-size: 0.9375rem;
 }
 
-/* 代码块语言标签 */
-.doc-content :global([data-language])::before {
-  content: attr(data-language);
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
+/* "速览"卡片：紧跟 ## 速览 的第一个列表渲染成卡片 */
+.type-daily-finance .doc-content h2#速览 {
+  border-left-color: var(--df-accent-soft);
 }
 
-/* 响应式优化 */
+.type-daily-finance .doc-content h2#速览 + ul {
+  list-style: none;
+  padding: 0.25rem 1.25rem 0.5rem;
+  margin: 0 0 2rem;
+  background: var(--df-tint);
+  border: 1px solid color-mix(in srgb, var(--df-accent-soft) 35%, transparent);
+  border-radius: 0.625rem;
+}
+
+.type-daily-finance .doc-content h2#速览 + ul li {
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--df-accent-soft) 25%, transparent);
+}
+
+.type-daily-finance .doc-content h2#速览 + ul li:last-child {
+  border-bottom: none;
+}
+
+/* ---------- 移动端 ---------- */
+
 @media (max-width: 768px) {
-  .doc-content :global(h1 .heading-link)::before,
-  .doc-content :global(h2 .heading-link)::before,
-  .doc-content :global(h3 .heading-link)::before,
-  .doc-content :global(h4 .heading-link)::before,
-  .doc-content :global(h5 .heading-link)::before,
-  .doc-content :global(h6 .heading-link)::before {
-    left: -1rem;
+  .doc-content h2 {
+    font-size: 1.25rem;
   }
 
-  .doc-content :global(.mermaid) {
-    padding: 1rem;
-    font-size: 0.875rem;
+  .type-daily-finance .doc-content h2 {
+    font-size: 1.1875rem;
+    padding-left: 0.625rem;
+  }
+
+  .doc-content table,
+  .type-daily-finance .doc-content table {
+    font-size: 0.8125rem;
+  }
+
+  .doc-content thead th,
+  .doc-content tbody td {
+    padding: 0.45rem 0.55rem;
+  }
+
+  .doc-content {
+    font-size: 0.9375rem;
   }
 }

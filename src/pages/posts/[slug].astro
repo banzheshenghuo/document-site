@@ -31,7 +31,7 @@ const dateStr = doc.data.date
 ---
 
 <DocLayout title={doc.data.title} description={doc.data.description}>
-  <article class="doc-page">
+  <article class:list={['doc-page', doc.data.type ? `type-${doc.data.type}` : 'type-read']}>
     <!-- 阅读进度条 -->
     <div class="reading-progress" id="readingProgress">
       <div class="reading-progress-bar" id="readingProgressBar"></div>
@@ -349,76 +349,8 @@ const dateStr = doc.data.date
     color: var(--color-primary);
   }
 
-  /* ===== 文章内容 ===== */
-  .doc-content {
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
-  .doc-content > * {
-    max-width: 100%;
-    overflow-wrap: break-word;
-  }
-
-  .doc-content h2 {
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--color-border);
-    font-size: 1.625rem;
-    font-weight: 700;
-  }
-
-  .doc-content h3 {
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
-    font-size: 1.3rem;
-    font-weight: 600;
-  }
-
-  .doc-content p {
-    margin-bottom: 1.25rem;
-    line-height: 1.8;
-  }
-
-  .doc-content ul,
-  .doc-content ol {
-    margin-bottom: 1.25rem;
-    padding-left: 1.75rem;
-  }
-
-  .doc-content li {
-    margin-bottom: 0.5rem;
-    line-height: 1.7;
-  }
-
-  .doc-content a {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
-    color: var(--color-primary);
-  }
-
-  .doc-content a:hover {
-    text-decoration-thickness: 2px;
-  }
-
-  .doc-content pre {
-    background: var(--color-code-bg);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    overflow-x: auto;
-    max-width: 100%;
-    margin: 1.5rem 0;
-  }
-
-  .doc-content pre code {
-    display: block;
-    padding: 1rem;
-    overflow-x: auto;
-    font-size: 0.875rem;
-    line-height: 1.6;
-  }
+  /* 文章内容排版统一在 src/styles/prose.css（全局引入；
+     此处原先的 scoped 规则对 <Content /> 输出不生效，已移除） */
 
   /* ===== 文章底部 ===== */
   .doc-footer {
