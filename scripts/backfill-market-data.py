@@ -72,7 +72,7 @@ def flows(date_str):
                     lines.append(f"- {label}: 净买额 {float(net):+.2f} 亿")
         except Exception as e:
             print(f"[warn] flows {sym}: {e}", file=sys.stderr)
-    lines.append("- 北向（沪股通/深股通）: 官方自 2024 年起停止披露每日净买额，数据暂缺")
+    # 北向（沪股通/深股通）官方自 2024 年起停止披露每日净买额，不再列示
     return "### 南北向资金\n\n" + "\n".join(lines)
 
 @safe
